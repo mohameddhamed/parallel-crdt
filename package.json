@@ -18,6 +18,11 @@
         "title": "Hello World"
       },
       {
+        "command": "parallel-code.showWebView",
+        "category": "Parallel Code",
+        "title": "Show Web View"
+      },
+      {
         "command": "parallel-code.AskQuestion",
         "category": "Parallel Code",
         "title": "Ask a Question"

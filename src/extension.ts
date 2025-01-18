@@ -13,13 +13,24 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	const disposable = vscode.commands.registerCommand('parallel-code.helloWorld', () => {
+	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.helloWorld', () => {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello Modified from parallel-code!');
-	});
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.AskQuestion', async () => {
+		// The code you place here will be executed every time your command is executed
+		// Display a message box to the user
+		const answer = await vscode.window.showInformationMessage('How was your day?', "Good", "Gooder");
 
-	context.subscriptions.push(disposable);
+		if (answer == "Good") {
+			vscode.window.showInformationMessage('Great');
+		} else {
+			vscode.window.showInformationMessage('Greater');
+		}
+	}));
+
+	
 }
 
 // This method is called when your extension is deactivated

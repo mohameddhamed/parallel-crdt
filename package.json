@@ -16,6 +16,11 @@
       {
         "command": "parallel-code.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "parallel-code.AskQuestion",
+        "category": "Parallel Code",
+        "title": "Ask a Question"
       }
     ]
   },

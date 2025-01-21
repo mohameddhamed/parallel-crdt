@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { getNonce } from "./getnonce";
+import { getNonce } from "./getNonce";
 
 export class HelloWorldPanel {
   /**
@@ -126,7 +126,7 @@ export class HelloWorldPanel {
     // // And the uri we use to load this script in the webview
     const scriptUri = webview.asWebviewUri(
     //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/swiper.js")
-      vscode.Uri.joinPath(this._extensionUri, "media", "main.js")
+      vscode.Uri.joinPath(this._extensionUri, "out/compiled", "HelloWorld")
     );
 
     // Local path to css styles
@@ -163,8 +163,6 @@ export class HelloWorldPanel {
         <link href="${cssUri}" rel="stylesheet">
         </head>
         <body>
-        <h1>Hello World</h1>
-        <input></input>
         </body>
         <script nonce="${nonce}" src="${scriptUri}"></script>
         </html>`;

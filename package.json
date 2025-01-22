@@ -18,6 +18,11 @@
         "title": "Hello World"
       },
       {
+        "command": "parallel-code.refresh",
+        "category": "Parallel Code",
+        "title": "Refresh"
+      },
+      {
         "command": "parallel-code.showWebView",
         "category": "Parallel Code",
         "title": "Show Web View"

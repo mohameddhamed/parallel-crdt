@@ -19,14 +19,20 @@ export function activate(context: vscode.ExtensionContext) {
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello Modified from parallel-code!');
 	}));
+	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.refresh', () => {
+		HelloWorldPanel.kill();
+		HelloWorldPanel.createOrShow(context.extensionUri);
+
+		setTimeout(() =>
+			vscode.commands.executeCommand(
+			"workbench.action.webview.openDeveloperTools"
+		),500);
+      
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.showWebView', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		HelloWorldPanel.createOrShow(context.extensionUri);
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.AskQuestion', async () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
 		const answer = await vscode.window.showInformationMessage('How was your day?', "Good", "Gooder");
 
 		if (answer == "Good") {

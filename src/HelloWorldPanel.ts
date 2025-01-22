@@ -126,7 +126,7 @@ export class HelloWorldPanel {
     // // And the uri we use to load this script in the webview
     const scriptUri = webview.asWebviewUri(
     //   vscode.Uri.joinPath(this._extensionUri, "out", "compiled/swiper.js")
-      vscode.Uri.joinPath(this._extensionUri, "out/compiled", "HelloWorld")
+      vscode.Uri.joinPath(this._extensionUri, "out", "compiled/HelloWorld.js")
     );
 
     // Local path to css styles

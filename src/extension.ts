@@ -8,6 +8,11 @@ import { SidebarProvider } from './SidebarProvider';
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 
+	const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
+	item.command = "parallel-code.PasteSelection";
+	item.text = "$(server) Paste Selection"
+	item.show()
+
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
 	console.log('Congratulations, your extension "parallel-code" is now active!');
@@ -37,6 +42,27 @@ export function activate(context: vscode.ExtensionContext) {
 		sidebarProvider
 		)
 	);
+	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.PasteSelection', () => {
+		const { activeTextEditor } = vscode.window;
+
+		if (activeTextEditor) {
+			const text = activeTextEditor.document.getText(
+				activeTextEditor.selection
+			);
+			
+			if (text.length == 0) {
+				vscode.window.showInformationMessage("Nothing to paste");
+			}
+			sidebarProvider._view?.webview.postMessage({
+				type: "new-todo",
+				value: text
+			});	
+		} else {
+			vscode.window.showInformationMessage("No active text editor");
+
+		}
+
+	}));
 	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.showWebView', () => {
 		HelloWorldPanel.createOrShow(context.extensionUri);
 	}));

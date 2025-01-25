@@ -1,6 +1,18 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+
     let todos : Array<{text : string; completed : boolean}> = [];
     let text = '';
+
+    onMount(() => {
+        window.addEventListener("message", (e) => {
+            let message = e.data;
+            console.log(message);
+            if (message.type == "new-todo") {
+                todos = [{text: message.value, completed: false}, ...todos]
+            }
+        })
+    })
 
 </script>
 <style>

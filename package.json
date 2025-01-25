@@ -38,6 +38,11 @@
         "title": "Hello World"
       },
       {
+        "command": "parallel-code.PasteSelection",
+        "category": "Parallel Code",
+        "title": "Paste Selection"
+      },
+      {
         "command": "parallel-code.refresh",
         "category": "Parallel Code",
         "title": "Refresh"

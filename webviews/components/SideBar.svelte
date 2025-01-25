@@ -24,6 +24,7 @@
 </form>
 <ul>
     {#each todos as todo (todo.text)}
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
         <li 
             class:complete={todo.completed} 
             on:click={() => {
@@ -33,3 +34,13 @@
         </li>
     {/each}
 </ul>
+<button on:click={() => {
+    tsvscode.postMessage({ type: 'onInfo', value : "Posting Info" });
+}}>
+    Post Info
+</button>
+<button on:click={() => {
+    tsvscode.postMessage({ type: 'onError', value : "Posting Error" });
+}}>
+    Post Error
+</button>

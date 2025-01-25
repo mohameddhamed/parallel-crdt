@@ -1,4 +1,6 @@
 <script lang="ts">
+    let todos : Array<{text : string; completed : boolean}> = [];
+    let text = '';
 
 </script>
 <style>
@@ -6,5 +8,28 @@
         background-color: aliceblue;
         color: black;
     }
+    .complete {
+        background-color: green;
+        color: white;
+    }
 </style>
 <h1>SideBar from Svelte</h1>
+<form
+    on:submit|preventDefault={() => {
+        todos = [{text, completed: false}, ...todos]
+        text = ''
+    }}
+    >
+    <input bind:value={text}/>
+</form>
+<ul>
+    {#each todos as todo (todo.text)}
+        <li 
+            class:complete={todo.completed} 
+            on:click={() => {
+            todo.completed = !todo.completed; 
+            }}>
+            {todo.text}
+        </li>
+    {/each}
+</ul>

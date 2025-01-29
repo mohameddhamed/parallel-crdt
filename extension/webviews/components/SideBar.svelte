@@ -1,18 +1,37 @@
 <script lang="ts">
   import { onMount } from "svelte";
 
+    let accessToken = ''
     let todos : Array<{text : string; completed : boolean}> = [];
     let text = '';
+    let user : {id : number; name : string} | null = null;
+    let loading = true;
 
-    onMount(() => {
-        window.addEventListener("message", (e) => {
+    onMount(async () => {
+        window.addEventListener("message", async (e) => {
             let message = e.data;
             console.log(message);
-            if (message.type == "new-todo") {
+            switch (message.type) {
+
+            case "new-todo": 
                 todos = [{text: message.value, completed: false}, ...todos]
+            
+            case "token": 
+                accessToken = message.value;
+                const response = await fetch(`${apiBaseUrl}me`, {
+                    headers : {
+                        authorization : `Bearer ${accessToken}`
+                    }
+                })
+                console.log("the response is, ", response)
+                const data = await response.json();
+                user = data.user;
+                loading = false;
             }
         })
+        tsvscode.postMessage({type: 'get-token', value: undefined})
     })
+
 
 </script>
 <style>
@@ -25,7 +44,14 @@
         color: white;
     }
 </style>
-<h1>SideBar from Svelte</h1>
+<h1>SideBar from Svelte 2</h1>
+{#if loading}
+    <h1>Loading</h1>
+{:else if user}
+    <pre>{JSON.stringify(user, null, 2)}</pre>
+{:else}
+    <h1>no user is logged in</h1>
+{/if}
 <form
     on:submit|preventDefault={() => {
         todos = [{text, completed: false}, ...todos]

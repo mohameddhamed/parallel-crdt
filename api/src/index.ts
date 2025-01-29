@@ -6,7 +6,8 @@ import { __prod__ } from "./constants";
 import { User } from "./entities/User";
 import { Strategy as GithubStrategy } from "passport-github";
 import passport from "passport";
-import jwt from "jsonwebtoken";
+import jwt, {verify} from "jsonwebtoken";
+import cors from 'cors'
 
 const dataSource = new DataSource({
     type: "postgres",
@@ -25,6 +26,7 @@ const dataSource = new DataSource({
         done(null, user.accessToken);
     });
     const app = express();
+    app.use(cors({origin : '*'}))
     app.use(passport.initialize());
 
     passport.use(
@@ -35,24 +37,65 @@ const dataSource = new DataSource({
                 callbackURL: "http://localhost:3002/auth/github/callback",
             },
             async (_, __, profile, cb) => {
-                console.log(profile);
+                console.log("the profile" , profile);
                 // User.findOrCreate({ githubId: profile.id }, function (err, user) {
                 let user = await User.findOne({
                     where: {githubId : profile.id}
                 })
-                if (!user) {
-                    User.create({name : profile.displayName, githubId : profile.id})
-                } else {
+                if (user) {
                     user.name = profile.displayName;
                     await user.save();
+                } else {
+                    user = await User.create({
+                        name: profile.displayName,
+                        githubId : profile.id,
+                    }).save();
                 }
+                console.log("the user", user)
+
+                let myAccessToken = jwt.sign({userId: user?.id}, process.env.GITHUB_TOKEN, {expiresIn : "1y"});
 
                 cb(null, { 
-                    accessToken: jwt.sign({userId: user?.id}, process.env.GITHUB_TOKEN, {expiresIn : "1y"})});
+                    accessToken : myAccessToken
+                });
             }
         )
     );
     app.get("/auth/github", passport.authenticate("github", {session : false}));
+    app.get('/me', async (req, res) => {
+        const authHeader = req.headers.authorization;
+        if (! authHeader) {
+            res.send({user: null})
+            return;
+        }
+        let token = authHeader.split(" ")[1];
+
+        if (!token) {
+            res.send({user: null})
+            return;
+        }
+
+        let userId = '';
+        try {
+            let payload : any = verify(token, process.env.GITHUB_TOKEN)            
+            userId = payload.userId
+            console.log("the decoded" ,jwt.decode(token))
+            console.log("token " ,token, "\n TOKEN", process.env.GITHUB_TOKEN)
+
+        } catch (err) {
+            console.log('wow', err)
+            res.send({user: null})
+            return;
+        }
+        if (!userId) {
+            res.send({user: null})
+            return;
+        }
+        const user = await User.findOne({where : {id : userId}})
+        console.log("the user is ", user)
+        res.send({user})
+
+    })
 
     app.get(
         "/auth/github/callback",

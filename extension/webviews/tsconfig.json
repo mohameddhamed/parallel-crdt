@@ -3,6 +3,7 @@
     "include": [
       "./**/*"
     ],
+    "moduleResolution": "node",
     "exclude": ["../node_modules/*"],
     "compilerOptions": {"strict": true, }
   }

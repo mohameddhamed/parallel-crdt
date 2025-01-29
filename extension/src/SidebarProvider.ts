@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 import { getNonce } from "./getNonce";
+import { BASEURL } from "./constants";
+import { TokenManager } from "./TokenManager";
 
 export class SidebarProvider implements vscode.WebviewViewProvider {
   _view?: vscode.WebviewView;
@@ -26,6 +28,14 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
             return;
           }
           vscode.window.showInformationMessage(data.value);
+          break;
+        }
+        case 'get-token' : {
+          console.log("received get-token request");
+          webviewView.webview.postMessage({
+            type : 'token',
+            value : TokenManager.getToken(), 
+          });
           break;
         }
         case "onError": {
@@ -77,6 +87,7 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
         <link href="${styleMainUri}" rel="stylesheet">
         <script nonce="${nonce}">
           const tsvscode = acquireVsCodeApi();
+          const apiBaseUrl = ${JSON.stringify(BASEURL)};
         </script>
 			</head>
       <body>

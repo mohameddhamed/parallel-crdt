@@ -3,10 +3,15 @@
 import * as vscode from 'vscode';
 import { HelloWorldPanel } from './HelloWorldPanel';
 import { SidebarProvider } from './SidebarProvider';
+import { authenticate } from './Authenticate';
+import { TokenManager } from './TokenManager';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+
+	TokenManager.globalState = context.globalState;
+	console.log("The token is ", TokenManager.getToken())
 
 	const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right);
 	item.command = "parallel-code.PasteSelection";
@@ -62,6 +67,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 		}
 
+	}));
+	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.Authenticate', () => {
+		authenticate();
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.showWebView', () => {
 		HelloWorldPanel.createOrShow(context.extensionUri);

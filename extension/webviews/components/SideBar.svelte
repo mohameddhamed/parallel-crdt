@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import Todos from "./Todos.svelte";
+  import type { User } from "../types";
 
     let accessToken = ''
-    let todos : Array<{text : string; completed : boolean}> = [];
-    let text = '';
-    let user : {id : number; name : string} | null = null;
+    let user : User | null = null;
     let loading = true;
 
     onMount(async () => {
@@ -13,8 +13,6 @@
             console.log(message);
             switch (message.type) {
 
-            case "new-todo": 
-                todos = [{text: message.value, completed: false}, ...todos]
             
             case "token": 
                 accessToken = message.value;
@@ -49,36 +47,19 @@
     <h1>Loading</h1>
 {:else if user}
     <pre>{JSON.stringify(user, null, 2)}</pre>
+    <Todos user={user}/> 
+    <button on:click={() => {
+        user = null;
+        accessToken = '';
+        tsvscode.postMessage({type: 'logout', value: undefined})
+    }}>
+        Logout
+    </button>
 {:else}
     <h1>no user is logged in</h1>
+    <button on:click={() => {
+        tsvscode.postMessage({type: 'authenticate', value: undefined})
+    }}>
+        Login
+    </button>
 {/if}
-<form
-    on:submit|preventDefault={() => {
-        todos = [{text, completed: false}, ...todos]
-        text = ''
-    }}
-    >
-    <input bind:value={text}/>
-</form>
-<ul>
-    {#each todos as todo (todo.text)}
-        <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <li 
-            class:complete={todo.completed} 
-            on:click={() => {
-            todo.completed = !todo.completed; 
-            }}>
-            {todo.text}
-        </li>
-    {/each}
-</ul>
-<button on:click={() => {
-    tsvscode.postMessage({ type: 'onInfo', value : "Posting Info" });
-}}>
-    Post Info
-</button>
-<button on:click={() => {
-    tsvscode.postMessage({ type: 'onError', value : "Posting Error" });
-}}>
-    Post Error
-</button>

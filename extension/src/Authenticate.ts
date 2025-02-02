@@ -9,14 +9,15 @@ export const authenticate = (fn : () => void) => {
 
     app.get('auth/:token', async (req, res) => {
         const {token} = req.params;
-        if (token) {
-            await TokenManager.setToken(token);
-            res.end(`<h1> You have successfully logged in ${token} </h1>`);
-            fn();
-            (app as any).server.close();
-        } else {
+        if (!token) {
             res.end('Error occurred during auth');
-        }
+            return;
+        } 
+        await TokenManager.setToken(token);
+        fn();
+
+        res.end(`<h1> You have successfully logged in ${token} </h1>`);
+        (app as any).server.close();
 
     })
     app.listen(54321, (err : Error) => {

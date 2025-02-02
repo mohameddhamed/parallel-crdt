@@ -47,7 +47,7 @@
     <h1>Loading</h1>
 {:else if user}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <Todos user={user}/> 
+    <Todos user={user} {accessToken}/> 
     <button on:click={() => {
         user = null;
         accessToken = '';

@@ -5,6 +5,7 @@
     let text = "";
     let todos : Array<{text : string; completed : boolean}> = [];
     export let user : User;
+    export let accessToken : string;
 
     onMount(async () => {
         window.addEventListener("message", async (e) => {
@@ -17,6 +18,14 @@
             }    
         })
         tsvscode.postMessage({type: 'get-token', value: undefined})
+
+        const response = await fetch(`${apiBaseUrl}todo`, {
+            headers : {
+                authorization : `Bearer ${accessToken}`
+            }
+        })
+        const payload = await response.json();
+        todos = payload.todos
     })
 
 
@@ -35,9 +44,21 @@
     Hello {user.name}
 </div>
 <form
-    on:submit|preventDefault={() => {
-        todos = [{text, completed: false}, ...todos]
+    on:submit|preventDefault={ async () => {
+        const response = await fetch(`${apiBaseUrl}todo`, {
+            method : 'POST',
+            body : JSON.stringify({
+                text,
+            }),
+            headers : {
+                'content-type' : 'application/json',
+                authorization : `Bearer ${accessToken}`
+            }
+        })
+        const {todo} = await response.json();
+        todos = [todo, ...todos]
         text = ''
+
     }}
     >
     <input bind:value={text}/>

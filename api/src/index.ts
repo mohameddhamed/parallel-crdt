@@ -8,6 +8,8 @@ import { Strategy as GithubStrategy } from "passport-github";
 import passport from "passport";
 import jwt, {verify} from "jsonwebtoken";
 import cors from 'cors'
+import { Todo } from "./entities/Todo";
+import { isAuth } from "./isAuth";
 
 const dataSource = new DataSource({
     type: "postgres",
@@ -28,6 +30,7 @@ const dataSource = new DataSource({
     const app = express();
     app.use(cors({origin : '*'}))
     app.use(passport.initialize());
+    app.use(express.json())
 
     passport.use(
         new GithubStrategy(
@@ -62,6 +65,25 @@ const dataSource = new DataSource({
         )
     );
     app.get("/auth/github", passport.authenticate("github", {session : false}));
+    
+    app.get('/todo', isAuth, async (req : any, res) => {
+        // console.log('the req', req)
+        const todos = await Todo.find({
+            where : {creatorId : req.userId}, 
+            order : {id : 'DESC'}
+        });
+        res.send({todos})
+    })
+    app.post('/todo', isAuth, async (req : any, res) => {
+        // console.log('the req', req)
+        const todo = await Todo.create({
+           text: req.body.text,
+           creatorId : req.userId 
+        }).save();
+        console.log("The todo", todo)
+        res.send({todo})
+    })
+
     app.get('/me', async (req, res) => {
         const authHeader = req.headers.authorization;
         if (! authHeader) {

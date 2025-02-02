@@ -69,7 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.Authenticate', () => {
-		authenticate();
+		authenticate(() => {});
 	}));
 	context.subscriptions.push(vscode.commands.registerCommand('parallel-code.showWebView', () => {
 		HelloWorldPanel.createOrShow(context.extensionUri);

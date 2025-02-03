@@ -6,6 +6,11 @@
     let accessToken = ''
     let user : User | null = null;
     let loading = true;
+    let page : 'Todo' | 'Contact' = tsvscode.getState()?.page || 'Todo'
+
+    $: {
+        tsvscode.setState({page});
+    }
 
     onMount(async () => {
         window.addEventListener("message", async (e) => {
@@ -46,6 +51,7 @@
 {#if loading}
     <h1>Loading</h1>
 {:else if user}
+    {#if page == 'Todo' }
     <pre>{JSON.stringify(user, null, 2)}</pre>
     <Todos user={user} {accessToken}/> 
     <button on:click={() => {
@@ -55,6 +61,16 @@
     }}>
         Logout
     </button>
+    <button on:click={() => {
+        page = 'Contact'
+    }}>Go to Contact</button>
+    {:else}
+    <h1>Contact Page</h1>
+    <button on:click={() => {
+        page = 'Todo'
+    }}>Go to Todos</button>
+        
+    {/if}
 {:else}
     <h1>no user is logged in</h1>
     <button on:click={() => {

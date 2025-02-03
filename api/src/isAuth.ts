@@ -15,7 +15,7 @@ export const isAuth: RequestHandler<{}, any, any, {}> = (req, _, next) => {
 
         try {
             let payload : any = jwt.verify(token, process.env.GITHUB_TOKEN);
-            (req as any).userId = payload.userId
+            req.userId = payload.userId
 
             next();
             return

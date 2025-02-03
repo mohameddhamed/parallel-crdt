@@ -3,9 +3,25 @@
   import type { User } from "../types";
 
     let text = "";
-    let todos : Array<{text : string; completed : boolean}> = [];
+    let todos : Array<{text : string; completed : boolean; id : number}> = [];
     export let user : User;
     export let accessToken : string;
+
+    const addTodo = async (t : string) => {
+        text = t;
+        const response = await fetch(`${apiBaseUrl}todo`, {
+            method : 'POST',
+            body : JSON.stringify({
+                text,
+            }),
+            headers : {
+                'content-type' : 'application/json',
+                authorization : `Bearer ${accessToken}`
+            }
+        })
+        const {todo} = await response.json();
+        todos = [todo, ...todos]
+    }
 
     onMount(async () => {
         window.addEventListener("message", async (e) => {
@@ -14,7 +30,8 @@
             switch (message.type) {
 
             case "new-todo": 
-                todos = [{text: message.value, completed: false}, ...todos]
+                // todos = [{text: message.value, completed: false}, ...todos]
+                addTodo(message.value);
             }    
         })
         tsvscode.postMessage({type: 'get-token', value: undefined})
@@ -45,18 +62,7 @@
 </div>
 <form
     on:submit|preventDefault={ async () => {
-        const response = await fetch(`${apiBaseUrl}todo`, {
-            method : 'POST',
-            body : JSON.stringify({
-                text,
-            }),
-            headers : {
-                'content-type' : 'application/json',
-                authorization : `Bearer ${accessToken}`
-            }
-        })
-        const {todo} = await response.json();
-        todos = [todo, ...todos]
+        addTodo(text)
         text = ''
 
     }}
@@ -64,12 +70,24 @@
     <input bind:value={text}/>
 </form>
 <ul>
-    {#each todos as todo (todo.text)}
+    {#each todos as todo (todo.id)}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
         <li 
             class:complete={todo.completed} 
-            on:click={() => {
-            todo.completed = !todo.completed; 
+            on:click={async () => {
+                todo.completed = !todo.completed; 
+                const response = await fetch(`${apiBaseUrl}todo`, {
+                    method : 'PUT',
+                    body : JSON.stringify({
+                        id : todo.id,
+                    }),
+                    headers : {
+                        'content-type' : 'application/json',
+                        authorization : `Bearer ${accessToken}`
+                    }
+                })
+                // const {todo} = await response.json();
+
             }}>
             {todo.text}
         </li>

@@ -66,7 +66,25 @@ const dataSource = new DataSource({
     );
     app.get("/auth/github", passport.authenticate("github", {session : false}));
     
-    app.get('/todo', isAuth, async (req : any, res) => {
+    app.put('/todo', isAuth, async (req : any, res) => {
+        // console.log('the req', req)
+        const todo = await Todo.findOne({
+            where : {id : req.id}, 
+        });
+
+        if (!todo) {
+            res.send({todo : null})
+            return
+        }
+        if (todo.creatorId != req.userId) {
+            throw new Error('Not Authorized to update')
+        }
+        todo.completed = !todo.completed;
+        await todo.save();
+
+        res.send({todo})
+    })
+    app.get('/todo', isAuth, async (req, res) => {
         // console.log('the req', req)
         const todos = await Todo.find({
             where : {creatorId : req.userId}, 
@@ -74,7 +92,7 @@ const dataSource = new DataSource({
         });
         res.send({todos})
     })
-    app.post('/todo', isAuth, async (req : any, res) => {
+    app.post('/todo', isAuth, async (req, res) => {
         // console.log('the req', req)
         const todo = await Todo.create({
            text: req.body.text,

@@ -22,13 +22,24 @@
       ]
     },
     "views": {
-      "parallel-sidebar-view": [
+      "explorer": [
         {
-          "type": "webview",
-          "id": "parallel-sidebar",
-          "name": "Parallel",
-          "icon": "media/server.svg",
-          "contextualTitle": "Parallel"
+          "id": "parallel.session",
+          "name": "Parallel"
+        }
+      ]
+    },
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "parallel-code.JoinSession",
+          "when": "view == parallel.session && viewItem == sessions",
+          "group": "inline"
+        },
+        {
+          "command": "parallel-code.NewSession",
+          "when": "view == parallel.session && viewItem == sessions",
+          "group": "inline"
         }
       ]
     },
@@ -61,6 +72,16 @@
         "command": "parallel-code.AskQuestion",
         "category": "Parallel Code",
         "title": "Ask a Question"
+      },
+      {
+        "command": "parallel-code.NewSession",
+        "category": "Parallel Code",
+        "title": "New Session"
+      },
+      {
+        "command": "parallel-code.JoinSession",
+        "category": "Parallel Code",
+        "title": "Join Session"
       }
     ]
   },
@@ -121,6 +142,11 @@
     "webpack-cli": "^4.10.0"
   },
   "dependencies": {
-    "polka": "^0.5.2"
+    "dotenv": "^16.4.7",
+    "polka": "^0.5.2",
+    "ws": "^8.18.1",
+    "y-protocols": "^1.0.6",
+    "y-websocket": "^2.1.0",
+    "yjs": "^13.6.23"
   }
 }

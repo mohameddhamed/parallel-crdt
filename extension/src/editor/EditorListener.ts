@@ -1,7 +1,10 @@
 import * as vscode from "vscode";
 import { PeerEditorDecoratorStore } from "./EditorDecoration";
-import { IEditorChannel, IEditorChannelListener } from "./IEditorChannel";
-import { Position, Selection } from "./EditorStructs";
+import {
+  IEditorChannel,
+  IEditorChannelListener,
+} from "../models/IEditorChannel";
+import { Position, Selection } from "../models/EditorStructs";
 import { get } from "http";
 import {
   convertPositionToVsCodePosition,

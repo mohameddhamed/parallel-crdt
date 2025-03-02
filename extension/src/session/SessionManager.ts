@@ -1,10 +1,10 @@
-import { BaseObservable } from "../BaseObservable";
-import { ConnAuthenticationInfo } from "../connection/SocketProvider";
+import { ObservedBy } from "../ObservedBy";
+import { ConnAuthenticationInfo } from "../models/SocketProvider";
 import { YWebSocketConnector } from "../connection/YWebSocketConnector";
 import { ISessionListener, Session } from "./Session";
 import * as vscode from "vscode";
 
-export class SessionManager extends BaseObservable<ISessionListener> {
+export class SessionManager extends ObservedBy<ISessionListener> {
   private sessions: Session[] = [];
 
   constructor(private connector: YWebSocketConnector) {

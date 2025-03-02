@@ -1,8 +1,8 @@
 import { Selection } from "vscode";
 import * as Y from "yjs";
-import { PeerSelection } from "../editor/EditorStructs";
+import { PeerSelection } from "../models/EditorStructs";
 import { PeerFileFieldKeys } from "../yjs/yjsUtils";
-import { Peer } from "../peer/Peer";
+import { Peer } from "../models/Peer";
 
 export interface IPeerFile {
   peerName: string;

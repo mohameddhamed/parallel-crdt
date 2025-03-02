@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Peer } from "../peer/Peer";
+import { Peer } from "../models/Peer";
 import { Session } from "../session/Session";
 // type alias
 export type TreeNode = vscode.TreeItem;

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { IEditorChannel } from "../editor/IEditorChannel";
+import { IEditorChannel } from "./IEditorChannel";
 
-export interface PeerFileListener {
+export interface IPeerFileListener {
   onRemoteFileAddedByPeer(
     fileUri: string,
     editorChannel: IEditorChannel

@@ -1,7 +1,10 @@
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 import { YWebSocketConnection } from "./YWebSocketConnection";
-import { ConnAuthenticationInfo, SocketProvider } from "./SocketProvider";
+import {
+  ConnAuthenticationInfo,
+  SocketProvider,
+} from "../models/SocketProvider";
 
 export class YWebSocketConnector {
   constructor(private websocketServerUrl: string) {

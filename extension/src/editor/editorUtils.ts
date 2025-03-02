@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Position } from "./EditorStructs";
+import { Position } from "../models/EditorStructs";
 import { get } from "http";
 
 export function isCursor(selection: vscode.Selection): boolean {

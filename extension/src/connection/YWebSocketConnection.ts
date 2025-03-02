@@ -1,5 +1,5 @@
 import { Doc } from "yjs";
-import { SocketProvider } from "./SocketProvider";
+import { SocketProvider } from "../models/SocketProvider";
 import { Session } from "../session/Session";
 import { PeerManager } from "../peer/PeerManager";
 import { FileSystemManager } from "../file/FileSystemManager";

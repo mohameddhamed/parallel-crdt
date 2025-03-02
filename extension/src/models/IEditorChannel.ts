@@ -1,5 +1,5 @@
-import { IDocumentChannel } from "../document/IDocumentChannel";
-import { Peer } from "../peer/Peer";
+import { IDocumentChannel } from "./IDocumentChannel";
+import { Peer } from "./Peer";
 import { Selection } from "./EditorStructs";
 
 export interface IEditorChannel {

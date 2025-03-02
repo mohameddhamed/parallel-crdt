@@ -1,4 +1,4 @@
-import { TextChange } from "../editor/EditorStructs";
+import { TextChange } from "./EditorStructs";
 
 export interface IDocumentChannel {
   addDocumentListener(listener: IDocumentChannelListener): void;

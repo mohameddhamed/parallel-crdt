@@ -2,15 +2,15 @@ import * as vscode from "vscode";
 import { FileSystemManager } from "./FileSystemManager";
 import { getAllFilesInDir, getFileKeyFromUri } from "./fileUtils";
 import EditorListener from "../editor/EditorListener";
-import { IEditorChannel } from "../editor/IEditorChannel";
-import { PeerFileListener } from "./PeerFileListener";
+import { IEditorChannel } from "../models/IEditorChannel";
+import { IPeerFileListener } from "../models/IPeerFileListener";
 import { FileStore, StoreFile } from "./FileStore";
 import { EditorManager, IEditorManager } from "../editor/EditorManager";
 import { DocumentManager, IDocumentManger } from "../document/DocumentManager";
 import DocumentListener from "../document/DocumentListener";
 import { YjsListener } from "../yjs/YjsListener";
 
-export class FileShareManager implements PeerFileListener {
+export class FileShareManager implements IPeerFileListener {
   private fileStore = new FileStore();
   private documentManager: IDocumentManger = new DocumentManager(
     this.fileStore,

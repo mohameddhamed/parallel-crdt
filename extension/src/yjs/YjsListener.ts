@@ -1,16 +1,16 @@
-import { BaseObservable } from "../BaseObservable";
-import { IEditorChannel } from "../editor/IEditorChannel";
-import { PeerFileListener } from "../file/PeerFileListener";
-import { IPeerConnectionListener } from "../peer/IPeerConnectionListener";
+import { ObservedBy } from "../ObservedBy";
+import { IEditorChannel } from "../models/IEditorChannel";
+import { IPeerFileListener } from "../models/IPeerFileListener";
+import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
 import * as Y from "yjs";
 import { PeerManager } from "../peer/PeerManager";
-import { Peer } from "../peer/Peer";
+import { Peer } from "../models/Peer";
 import { PeerFileMap, PeerFileMapWrapper } from "../file/PeerFile";
 import { EditorChannel } from "../editor/EditorChannel";
 import { PeerFileFieldKeys } from "./yjsUtils";
 
 // RemoteFileListener listens for all YjsListner events
-export class YjsListener extends BaseObservable<PeerFileListener> {
+export class YjsListener extends ObservedBy<IPeerFileListener> {
   // map peerId -> fileKey -> file
   private peers: Y.Map<Y.Map<Y.Map<unknown>>>;
   // map fileKey -> file
@@ -112,7 +112,7 @@ export class YjsListener extends BaseObservable<PeerFileListener> {
     };
     files.observe(fileChangeEventListener);
   }
-  addRemoteFileListener(fileShareManager: PeerFileListener): void {
+  addRemoteFileListener(fileShareManager: IPeerFileListener): void {
     this.registerListener(fileShareManager);
   }
 

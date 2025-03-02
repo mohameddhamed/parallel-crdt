@@ -1,15 +1,18 @@
 import { get } from "http";
-import { BaseObservable } from "../BaseObservable";
+import { ObservedBy } from "../ObservedBy";
 import { DocumentChannel } from "../document/DocumentChannel";
-import { IDocumentChannel } from "../document/IDocumentChannel";
+import { IDocumentChannel } from "../models/IDocumentChannel";
 import { IPeerFile } from "../file/PeerFile";
-import { Peer } from "../peer/Peer";
-import { PeerSelection, Selection } from "./EditorStructs";
-import { IEditorChannel, IEditorChannelListener } from "./IEditorChannel";
+import { Peer } from "../models/Peer";
+import { PeerSelection, Selection } from "../models/EditorStructs";
+import {
+  IEditorChannel,
+  IEditorChannelListener,
+} from "../models/IEditorChannel";
 import * as Y from "yjs";
 
 export class EditorChannel
-  extends BaseObservable<IEditorChannelListener>
+  extends ObservedBy<IEditorChannelListener>
   implements IEditorChannel
 {
   private readonly documentChannel: DocumentChannel;

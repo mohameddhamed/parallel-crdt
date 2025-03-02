@@ -3,7 +3,7 @@ type Notification<T> = (listener: T) => void;
 // Not an interface because it provides concrete method implementations
 // and maintains internal state
 // Not a Class because it should only be extended and not instantiated
-export abstract class BaseObservable<T> {
+export abstract class ObservedBy<T> {
   private listeners: T[] = [];
   private notifications: Notification<T>[] = [];
 

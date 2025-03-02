@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { SocketProvider } from "../connection/SocketProvider";
+import { SocketProvider } from "../models/SocketProvider";
 import { PeerManager } from "../peer/PeerManager";
-import { Peer } from "../peer/Peer";
+import { Peer } from "../models/Peer";
 import { FileShareManager } from "../file/FileShareManager";
 
 export class Session {

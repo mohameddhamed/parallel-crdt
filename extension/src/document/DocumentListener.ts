@@ -1,6 +1,9 @@
 import * as vscode from "vscode";
-import { IDocumentChannel, IDocumentChannelListener } from "./IDocumentChannel";
-import { Position, TextChange, TextChangeType } from "../editor/EditorStructs";
+import {
+  IDocumentChannel,
+  IDocumentChannelListener,
+} from "../models/IDocumentChannel";
+import { Position, TextChange, TextChangeType } from "../models/EditorStructs";
 import { getVsCodeRange } from "../editor/editorUtils";
 
 export default class DocumentListener implements IDocumentChannelListener {

@@ -1,8 +1,8 @@
-import { BaseObservable } from "../BaseObservable";
-import { Peer } from "./Peer";
-import { IPeerConnectionListener } from "./IPeerConnectionListener";
+import { ObservedBy } from "../ObservedBy";
+import { Peer } from "../models/Peer";
+import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
 
-export class PeerManager extends BaseObservable<IPeerConnectionListener> {
+export class PeerManager extends ObservedBy<IPeerConnectionListener> {
   private peers: Peer[] = [];
 
   peerJoined(peer: Peer): void {

@@ -1,16 +1,19 @@
 import { get } from "http";
-import { BaseObservable } from "../BaseObservable";
-import { TextChange, TextChangeType } from "../editor/EditorStructs";
+import { ObservedBy } from "../ObservedBy";
+import { TextChange, TextChangeType } from "../models/EditorStructs";
 import {
   getIndexFromPosition,
   getPositionFromIndex,
 } from "../editor/editorUtils";
 import { IPeerFile } from "../file/PeerFile";
-import { IDocumentChannel, IDocumentChannelListener } from "./IDocumentChannel";
+import {
+  IDocumentChannel,
+  IDocumentChannelListener,
+} from "../models/IDocumentChannel";
 import * as Y from "yjs";
 
 export class DocumentChannel
-  extends BaseObservable<IDocumentChannelListener>
+  extends ObservedBy<IDocumentChannelListener>
   implements IDocumentChannel
 {
   private currentText: string = "";

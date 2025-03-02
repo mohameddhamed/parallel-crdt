@@ -6,9 +6,9 @@ import {
   TreeNode,
 } from "./TreeNode";
 import { ISessionListener, Session } from "../session/Session";
-import { IPeerConnectionListener } from "../peer/IPeerConnectionListener";
+import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
 import { SessionManager } from "../session/SessionManager";
-import { Peer } from "../peer/Peer";
+import { Peer } from "../models/Peer";
 type EmittedEventType = void | TreeNode | TreeNode[] | null | undefined;
 
 export class SessionTreeDataProvider

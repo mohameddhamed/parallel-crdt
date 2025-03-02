@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { IConnectionListener } from "../connection/IConnectionListener";
 import { FileSystemManager } from "./FileSystemManager";
 import { getAllFilesInDir, getFileKeyFromUri } from "./fileUtils";
 import EditorListener from "../editor/EditorListener";
@@ -12,6 +11,7 @@ import { FileStore, StoreFile } from "./FileStore";
 import { EditorManager, IEditorManager } from "../editor/EditorManager";
 import { DocumentManager, IDocumentManger } from "../document/DocumentManager";
 import DocumentListener from "../document/DocumentListener";
+import { YjsListener } from "../yjs/YjsListener";
 
 export class FileShareManager
   implements ILocalRemoteFileOperations, RemoteFileListener
@@ -24,7 +24,7 @@ export class FileShareManager
   private editorManager: IEditorManager = new EditorManager(this.fileStore);
 
   constructor(
-    private connectionBinder: IConnectionListener,
+    private connectionBinder: YjsListener,
     private fileSystemManager: FileSystemManager
   ) {}
   async shareLocalFileToRemote(fileUri: vscode.Uri): Promise<void> {

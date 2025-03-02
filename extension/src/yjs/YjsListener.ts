@@ -8,12 +8,8 @@ import { Peer } from "../peer/Peer";
 import { PeerFileMap, PeerFileMapWrapper } from "../file/PeerFile";
 import { EditorChannel } from "../editor/EditorChannel";
 import { PeerFileFieldKeys } from "./yjsUtils";
-import { IConnectionListener } from "../connection/IConnectionListener";
 
-export class YjsListener
-  extends BaseObservable<RemoteFileListener>
-  implements IConnectionListener
-{
+export class YjsListener extends BaseObservable<RemoteFileListener> {
   // map peerId -> fileKey -> file
   private peers: Y.Map<Y.Map<Y.Map<unknown>>>;
   // map fileKey -> file

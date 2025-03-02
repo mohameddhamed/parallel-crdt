@@ -1,8 +1,7 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import { FileStore } from "../file/FileStore";
-import { ILocalRemoteFileOperations } from "../file/ILocalRemoteFileOperations";
-import { error } from "console";
+import { FileShareManager } from "../file/FileShareManager";
 export interface IDocumentManger {
   initializeLocalTextToRemote(document: vscode.TextDocument): void;
 }
@@ -10,7 +9,7 @@ export interface IDocumentManger {
 export class DocumentManager implements IDocumentManger {
   constructor(
     private fileStore: FileStore,
-    private sharerFromLocalToRemote: ILocalRemoteFileOperations
+    private sharerFromLocalToRemote: FileShareManager
   ) {
     // COME BACK TO THIS LATER
     vscode.workspace.onDidChangeTextDocument(

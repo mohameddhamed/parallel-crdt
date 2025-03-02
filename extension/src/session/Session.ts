@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 import { SocketProvider } from "../connection/SocketProvider";
 import { PeerManager } from "../peer/PeerManager";
-import { ILocalRemoteFileOperations } from "../file/ILocalRemoteFileOperations";
 import { Peer } from "../peer/Peer";
+import { FileShareManager } from "../file/FileShareManager";
 
 export class Session {
   constructor(
@@ -12,7 +12,7 @@ export class Session {
 
     private readonly userName: string,
     private readonly peerManager: PeerManager,
-    private readonly shareLocalFileToRemote: ILocalRemoteFileOperations
+    private readonly shareLocalFileToRemote: FileShareManager
   ) {}
 
   public getUserName(): string {

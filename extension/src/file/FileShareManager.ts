@@ -3,19 +3,14 @@ import { FileSystemManager } from "./FileSystemManager";
 import { getAllFilesInDir, getFileKeyFromUri } from "./fileUtils";
 import EditorListener from "../editor/EditorListener";
 import { IEditorChannel } from "../editor/IEditorChannel";
-import {
-  ILocalRemoteFileOperations,
-  RemoteFileListener,
-} from "./ILocalRemoteFileOperations";
+import { PeerFileListener } from "./PeerFileListener";
 import { FileStore, StoreFile } from "./FileStore";
 import { EditorManager, IEditorManager } from "../editor/EditorManager";
 import { DocumentManager, IDocumentManger } from "../document/DocumentManager";
 import DocumentListener from "../document/DocumentListener";
 import { YjsListener } from "../yjs/YjsListener";
 
-export class FileShareManager
-  implements ILocalRemoteFileOperations, RemoteFileListener
-{
+export class FileShareManager implements PeerFileListener {
   private fileStore = new FileStore();
   private documentManager: IDocumentManger = new DocumentManager(
     this.fileStore,

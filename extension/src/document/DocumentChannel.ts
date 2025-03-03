@@ -5,7 +5,7 @@ import {
   getIndexFromPosition,
   getPositionFromIndex,
 } from "../editor/editorUtils";
-import { IPeerFile } from "../file/PeerFile";
+import { PeerFileMap } from "../file/PeerFile";
 import {
   IDocumentChannel,
   IDocumentChannelListener,
@@ -20,7 +20,7 @@ export class DocumentChannel
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
-    public yjsFile: IPeerFile
+    public yjsFile: PeerFileMap
   ) {
     super();
     this.initObservers();

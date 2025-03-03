@@ -2,7 +2,7 @@ import { get } from "http";
 import { ObservedBy } from "../ObservedBy";
 import { DocumentChannel } from "../document/DocumentChannel";
 import { IDocumentChannel } from "../models/IDocumentChannel";
-import { IPeerFile } from "../file/PeerFile";
+import { PeerFileMap } from "../file/PeerFile";
 import { Peer } from "../models/Peer";
 import { PeerSelection, Selection } from "../models/EditorStructs";
 import {
@@ -19,7 +19,7 @@ export class EditorChannel
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
-    public yjsFile: IPeerFile
+    public yjsFile: PeerFileMap
   ) {
     super();
     const peerSelectionEventListener = (

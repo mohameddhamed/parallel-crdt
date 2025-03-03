@@ -5,7 +5,7 @@ import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
 import * as Y from "yjs";
 import { PeerManager } from "../peer/PeerManager";
 import { Peer } from "../models/Peer";
-import { PeerFileMap, PeerFileMapWrapper } from "../file/PeerFile";
+import { PeerFileMap } from "../file/PeerFile";
 import { EditorChannel } from "../editor/EditorChannel";
 import { PeerFileFieldKeys } from "./yjsUtils";
 
@@ -179,7 +179,7 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
       console.error("File is undefined");
       return;
     }
-    const remoteFile = new PeerFileMapWrapper(file);
+    const remoteFile = new PeerFileMap(peerName, fileKey);
     console.log("Remote file: ", remoteFile.peerFileKey);
 
     if (!this.peersEditorChannels.has(peerName)) {

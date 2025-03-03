@@ -5,7 +5,7 @@ import {
   getIndexFromPosition,
   getPositionFromIndex,
 } from "../editor/editorUtils";
-import { PeerFileMap } from "../file/PeerFile";
+import { PeerFileMap } from "../models/PeerFile";
 import {
   IDocumentChannel,
   IDocumentChannelListener,

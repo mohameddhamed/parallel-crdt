@@ -5,7 +5,7 @@ import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
 import * as Y from "yjs";
 import { PeerManager } from "../peer/PeerManager";
 import { Peer } from "../models/Peer";
-import { PeerFileMap } from "../file/PeerFile";
+import { PeerFileMap } from "../models/PeerFile";
 import { EditorChannel } from "../editor/EditorChannel";
 import { PeerFileFieldKeys } from "./yjsUtils";
 

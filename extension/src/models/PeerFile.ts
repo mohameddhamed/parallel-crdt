@@ -1,8 +1,8 @@
 import { Selection } from "vscode";
 import * as Y from "yjs";
-import { PeerSelection } from "../models/EditorStructs";
+import { PeerSelection } from "./EditorStructs";
 import { PeerFileFieldKeys } from "../yjs/yjsUtils";
-import { Peer } from "../models/Peer";
+import { Peer } from "./Peer";
 
 export class PeerFileMap extends Y.Map<any> {
   constructor(

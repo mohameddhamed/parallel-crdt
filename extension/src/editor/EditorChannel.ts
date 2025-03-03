@@ -2,7 +2,7 @@ import { get } from "http";
 import { ObservedBy } from "../ObservedBy";
 import { DocumentChannel } from "../document/DocumentChannel";
 import { IDocumentChannel } from "../models/IDocumentChannel";
-import { PeerFileMap } from "../file/PeerFile";
+import { PeerFileMap } from "../models/PeerFile";
 import { Peer } from "../models/Peer";
 import { PeerSelection, Selection } from "../models/EditorStructs";
 import {

@@ -9,10 +9,10 @@ import { initGlobal } from "./utils";
 import { Config } from "./Config";
 import { ConnectionManager } from "./connection/ConnectionManager";
 import { getWorkspaceFolderPath } from "./file/fileUtils";
-import { FileAndWorskspaceSharer } from "./file/FileAndWorkspaceSharer";
 import { SessionManager } from "./session/SessionManager";
 import { Facade } from "./facade";
 import { SessionTreeDataProvider } from "./Tree/SessionTreeDataProvider";
+import { FileSystemManager } from "./file/FileSystemManager";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -144,11 +144,12 @@ function registerCommands(
 function init(context: vscode.ExtensionContext): void {
   const config = new Config();
   const connectionFactory = new ConnectionManager(config);
-  const workspacePath = getWorkspaceFolderPath();
-  const fileSharer = new FileAndWorskspaceSharer(workspacePath);
   const sessionManager = new SessionManager(connectionFactory.getConnector());
 
-  const facade = new Facade(sessionManager, fileSharer);
+  const facade = new Facade(
+    sessionManager,
+    FileSystemManager.getFileSystemManagerInstance()
+  );
   const treeProvider = new SessionTreeDataProvider(sessionManager);
   sessionManager.registerListener(treeProvider);
   vscode.window.registerTreeDataProvider("parallel.session", treeProvider);

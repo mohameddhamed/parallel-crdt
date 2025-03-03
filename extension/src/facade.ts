@@ -1,19 +1,21 @@
 import { Config } from "./Config";
-import { FileAndWorskspaceSharer } from "./file/FileAndWorkspaceSharer";
+import { FileSystemManager } from "./file/FileSystemManager";
+import { getAllFilesInDir } from "./file/fileUtils";
+import { Session } from "./session/Session";
 import { SessionManager } from "./session/SessionManager";
 
 export class Facade {
   constructor(
     private sessionManager: SessionManager,
-    private fileSharer: FileAndWorskspaceSharer
+    private fileSystemManager: FileSystemManager
   ) {}
   async startSession(): Promise<void> {
-    if (!this.fileSharer.workspacePath) {
+    if (!this.fileSystemManager.getWorkspaceFolderPath()) {
       return;
     }
     const session = await this.sessionManager.startNewSession(true);
     console.debug("Session started: ", session);
-    await this.fileSharer.shareWorkspaceFilesToSessionPeers(session);
+    await this.fileSystemManager.shareWorkspaceFilesToSessionPeers(session);
   }
 
   async joinSession(): Promise<void> {

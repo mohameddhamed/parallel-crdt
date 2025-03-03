@@ -1,7 +1,12 @@
-import { createEmptyFile, getWorkspaceFolderPath } from "./fileUtils";
+import {
+  createEmptyFile,
+  getAllFilesInDir,
+  getWorkspaceFolderPath,
+} from "./fileUtils";
 import * as path from "path";
 import * as vscode from "vscode";
 import * as fs from "fs";
+import { Session } from "../session/Session";
 
 export class FileSystemManager {
   private static instance: FileSystemManager;
@@ -38,5 +43,28 @@ export class FileSystemManager {
   public deleteFile(file: vscode.Uri): void {
     const fullPathToFile = file.fsPath;
     fs.unlinkSync(fullPathToFile);
+  }
+
+  public getWorkspaceFolderPath(): string {
+    return this.workspaceFolderPath;
+  }
+
+  async shareWorkspaceFilesToSessionPeers(session: Session): Promise<void> {
+    // Share all files in the workspace
+    if (!this.workspaceFolderPath) {
+      console.error("Workspace path is not set");
+      return;
+    }
+    // Get all files in the workspace
+    const workspaceFiles = await getAllFilesInDir(this.workspaceFolderPath);
+    console.log("Sharing all files in the workspace: ", workspaceFiles);
+    // Share each file
+    for (const file of workspaceFiles) {
+      try {
+        await session.shareLocalFile(file);
+      } catch (e) {
+        console.error("Error sharing file: ", e, file);
+      }
+    }
   }
 }

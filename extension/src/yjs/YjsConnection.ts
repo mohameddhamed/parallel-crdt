@@ -1,5 +1,4 @@
 import { ObservedBy } from "../ObservedBy";
-import { IEditor } from "../models/IEditor";
 import { IYjsConnectionListener } from "../models/IPeerFileListener";
 import * as Y from "yjs";
 import { PeerConnection } from "../peer/PeerConnection";

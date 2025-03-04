@@ -1,15 +1,15 @@
 import { Doc } from "yjs";
-import { SocketProvider } from "../models/SocketProvider";
 import { Session } from "../session/Session";
 import { PeerConnection } from "../peer/PeerConnection";
 import { FileSystemManager } from "../file/FileSystemManager";
 import { FileShareManager } from "../file/FileShareManager";
 import { YjsConnection } from "../yjs/YjsConnection";
+import { WebsocketProvider } from "y-websocket";
 
 export class Connection {
   private readonly session: Session;
   constructor(
-    private provider: SocketProvider,
+    private provider: WebsocketProvider,
     private ydoc: Doc,
     private username: string,
     private roomName: string,

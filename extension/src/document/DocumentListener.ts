@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { IDocumentListener } from "../models/IDocument";
+import { IDocumentListener } from "../models/IDocumentListener";
 import { Position, TextChange, TextChangeType } from "../models/EditorStructs";
 import { getVsCodeRange } from "../editor/editorUtils";
 import { Document } from "./Document";

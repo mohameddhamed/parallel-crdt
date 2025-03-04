@@ -1,7 +1,6 @@
 import * as vscode from "vscode";
 import DocumentListener from "../document/DocumentListener";
 import EditorListener from "../editor/EditorListener";
-import { IEditor } from "../models/IEditor";
 import { getFileKeyFromUri } from "./fileUtils";
 import { Editor } from "../editor/Editor";
 

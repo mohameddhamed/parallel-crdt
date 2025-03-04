@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { PeerEditorDecoratorStore } from "./EditorDecoration";
-import { IEditor, IEditorListener } from "../models/IEditor";
+import { IEditorListener } from "../models/IEditorListener";
 import { Position, Selection } from "../models/EditorStructs";
 import { get } from "http";
 import {

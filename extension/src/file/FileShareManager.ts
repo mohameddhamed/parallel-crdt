@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { FileSystemManager } from "./FileSystemManager";
 import { getAllFilesInDir, getFileKeyFromUri } from "./fileUtils";
 import EditorListener from "../editor/EditorListener";
-import { IEditor } from "../models/IEditor";
 import { IYjsConnectionListener } from "../models/IPeerFileListener";
 import { FileStore, StoreFile } from "./FileStore";
 import { EditorManager, IEditorManager } from "../editor/EditorManager";

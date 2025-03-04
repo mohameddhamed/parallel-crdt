@@ -1,5 +1,5 @@
 import { ObservedBy } from "../ObservedBy";
-import { ConnAuthenticationInfo } from "../models/SocketProvider";
+import { ConnAuthenticationInfo } from "../models/ConnAuthenticationInfo";
 import { Connector } from "../connection/Connector";
 import { ISessionListener, Session } from "./Session";
 import * as vscode from "vscode";

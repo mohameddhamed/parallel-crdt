@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
-import { SocketProvider } from "../models/SocketProvider";
 import { PeerConnection } from "../peer/PeerConnection";
 import { Peer } from "../models/Peer";
 import { FileShareManager } from "../file/FileShareManager";
+import { WebsocketProvider } from "y-websocket";
 
 export class Session {
   constructor(
     public readonly roomName: string,
-    public readonly provider: SocketProvider,
+    public readonly provider: WebsocketProvider,
     public readonly isOwner: boolean,
 
     private readonly userName: string,

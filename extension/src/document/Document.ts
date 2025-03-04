@@ -6,7 +6,7 @@ import {
   getPositionFromIndex,
 } from "../editor/editorUtils";
 import { PeerFileMap } from "../models/PeerFile";
-import { IDocumentListener as IDocumentListener } from "../models/IDocument";
+import { IDocumentListener as IDocumentListener } from "../models/IDocumentListener";
 import * as Y from "yjs";
 
 // change name to Document

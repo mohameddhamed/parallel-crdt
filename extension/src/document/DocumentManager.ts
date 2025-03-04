@@ -47,7 +47,7 @@ export class DocumentManager implements IDocumentManger {
       return;
     }
   }
-  public onChangeLocalTextDocument(e: vscode.TextDocumentChangeEvent): void {
+  private onChangeLocalTextDocument(e: vscode.TextDocumentChangeEvent): void {
     if (e.contentChanges.length === 0) {
       console.log(
         "No content changes, reason: ",

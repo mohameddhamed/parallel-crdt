@@ -4,7 +4,7 @@ import { Document } from "../document/Document";
 import { PeerFileMap } from "../models/PeerFile";
 import { Peer } from "../models/Peer";
 import { PeerSelection, Selection } from "../models/EditorStructs";
-import { IEditorListener } from "../models/IEditor";
+import { IEditorListener } from "../models/IEditorListener";
 import * as Y from "yjs";
 
 // change name to Editor

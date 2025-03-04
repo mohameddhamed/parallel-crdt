@@ -1,10 +1,7 @@
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 import { Connection } from "./Connection";
-import {
-  ConnAuthenticationInfo,
-  SocketProvider,
-} from "../models/SocketProvider";
+import { ConnAuthenticationInfo } from "../models/ConnAuthenticationInfo";
 
 export class Connector {
   constructor(private websocketServerUrl: string) {
@@ -38,7 +35,7 @@ export class Connector {
     console.debug(`Connected to ${authenticationInfo.roomName}`);
 
     return new Connection(
-      new SocketProvider(provider),
+      provider,
       ydoc,
       authenticationInfo.username,
       authenticationInfo.roomName,

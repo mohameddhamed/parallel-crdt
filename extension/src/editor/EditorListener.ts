@@ -1,9 +1,6 @@
 import * as vscode from "vscode";
 import { PeerEditorDecoratorStore } from "./EditorDecoration";
-import {
-  IEditorChannel,
-  IEditorChannelListener,
-} from "../models/IEditorChannel";
+import { IEditor, IEditorListener } from "../models/IEditor";
 import { Position, Selection } from "../models/EditorStructs";
 import { get } from "http";
 import {
@@ -11,10 +8,11 @@ import {
   convertVsCodePositionToPosition,
 } from "./editorUtils";
 import { getFileKeyFromUri } from "../file/fileUtils";
+import { Editor } from "./Editor";
 
-export default class EditorListener implements IEditorChannelListener {
+export default class EditorListener implements IEditorListener {
   private peerEditorDecoratorStore = PeerEditorDecoratorStore.getInstance();
-  constructor(public editorChannel: IEditorChannel) {
+  constructor(public editorChannel: Editor) {
     // Register an instance of EditorListener as a listener for events or changes that occur within the IEditorChannel.
     // This allows the EditorListener to respond to these events and perform actions accordingly.
     this.editorChannel.addEditorChannelListener(this);

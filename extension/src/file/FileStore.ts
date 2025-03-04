@@ -1,8 +1,9 @@
 import * as vscode from "vscode";
 import DocumentListener from "../document/DocumentListener";
 import EditorListener from "../editor/EditorListener";
-import { IEditorChannel } from "../models/IEditorChannel";
+import { IEditor } from "../models/IEditor";
 import { getFileKeyFromUri } from "./fileUtils";
+import { Editor } from "../editor/Editor";
 
 export class FileStore {
   private files: Map<string, StoreFile> = new Map();
@@ -37,7 +38,7 @@ export class StoreFile {
     public readonly key: string,
     public readonly textDocument: vscode.TextDocument,
     public readonly textDocumentListener: DocumentListener,
-    public readonly editorChannel: IEditorChannel,
+    public readonly editorChannel: Editor,
     public readonly editorListener: EditorListener
   ) {}
 }

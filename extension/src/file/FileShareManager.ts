@@ -2,15 +2,16 @@ import * as vscode from "vscode";
 import { FileSystemManager } from "./FileSystemManager";
 import { getAllFilesInDir, getFileKeyFromUri } from "./fileUtils";
 import EditorListener from "../editor/EditorListener";
-import { IEditorChannel } from "../models/IEditorChannel";
-import { IPeerFileListener } from "../models/IPeerFileListener";
+import { IEditor } from "../models/IEditor";
+import { IYjsConnectionListener } from "../models/IPeerFileListener";
 import { FileStore, StoreFile } from "./FileStore";
 import { EditorManager, IEditorManager } from "../editor/EditorManager";
 import { DocumentManager, IDocumentManger } from "../document/DocumentManager";
 import DocumentListener from "../document/DocumentListener";
-import { YjsListener } from "../yjs/YjsListener";
+import { YjsConnection } from "../yjs/YjsConnection";
+import { Editor } from "../editor/Editor";
 
-export class FileShareManager implements IPeerFileListener {
+export class FileShareManager implements IYjsConnectionListener {
   private fileStore = new FileStore();
   private documentManager: IDocumentManger = new DocumentManager(
     this.fileStore,
@@ -19,7 +20,7 @@ export class FileShareManager implements IPeerFileListener {
   private editorManager: IEditorManager = new EditorManager(this.fileStore);
 
   constructor(
-    private connectionBinder: YjsListener,
+    private yjsConnectionHandler: YjsConnection,
     private fileSystemManager: FileSystemManager
   ) {}
   async shareLocalFileToRemote(fileUri: vscode.Uri): Promise<void> {
@@ -32,7 +33,8 @@ export class FileShareManager implements IPeerFileListener {
       console.log("File already shared and exists for file key: ", fileKey);
     }
 
-    const editorChannel = this.connectionBinder.sendLocalFileToPeers(fileKey);
+    const editorChannel =
+      this.yjsConnectionHandler.sendLocalFileToPeers(fileKey);
     sharedFile = await this.createAndSaveSharedFile(
       fileKey,
       fileUri,
@@ -48,7 +50,7 @@ export class FileShareManager implements IPeerFileListener {
 
   async onRemoteFileAddedByPeer(
     fileKey: string,
-    editorChannel: IEditorChannel
+    editorChannel: Editor
   ): Promise<void> {
     console.log("FileShareManager: Remote file : ", fileKey, " added by peer");
     const localFileUri = this.fileSystemManager.addFileToWorkspace(fileKey);
@@ -75,7 +77,7 @@ export class FileShareManager implements IPeerFileListener {
   private async createAndSaveSharedFile(
     fileKey: string,
     fileUri: vscode.Uri,
-    editorChannel: IEditorChannel
+    editorChannel: Editor
   ): Promise<StoreFile> {
     const editorListener = new EditorListener(editorChannel);
 
@@ -121,7 +123,7 @@ export class FileShareManager implements IPeerFileListener {
       console.warn("FileShareManager: No file found with name: ", fileKey);
       return;
     }
-    this.connectionBinder.deleteLocalFile(fileKey);
+    this.yjsConnectionHandler.deleteLocalFile(fileKey);
     this.fileStore.removeFileFromStore(fileKey);
   }
 }

@@ -1,30 +1,95 @@
 import { ObservedBy } from "../ObservedBy";
-import { IEditorChannel } from "../models/IEditorChannel";
-import { IPeerFileListener } from "../models/IPeerFileListener";
-import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
+import { IEditor } from "../models/IEditor";
+import { IYjsConnectionListener } from "../models/IPeerFileListener";
 import * as Y from "yjs";
-import { PeerManager } from "../peer/PeerManager";
+import { PeerConnection } from "../peer/PeerConnection";
 import { Peer } from "../models/Peer";
 import { PeerFileMap } from "../models/PeerFile";
-import { EditorChannel } from "../editor/EditorChannel";
+import { Editor } from "../editor/Editor";
 import { PeerFileFieldKeys } from "./yjsUtils";
 
 // RemoteFileListener listens for all YjsListner events
-export class YjsListener extends ObservedBy<IPeerFileListener> {
+export class YjsConnection extends ObservedBy<IYjsConnectionListener> {
   // map peerId -> fileKey -> file
   private peers: Y.Map<Y.Map<Y.Map<unknown>>>;
   // map fileKey -> file
   private currentFiles = new Y.Map<Y.Map<unknown>>();
-  private peersEditorChannels = new Map<string, Map<string, IEditorChannel>>();
+  private peersEditorChannels = new Map<string, Map<string, Editor>>();
 
   constructor(
     public doc = new Y.Doc(),
     public currentPeerName: string,
-    private peerConnectionListener: PeerManager
+    private peerConnectionListener: PeerConnection
   ) {
     super();
     this.peers = doc.getMap(PeerFileFieldKeys.peersKey);
     this.setupObservers();
+  }
+
+  addRemoteFileListener(fileShareManager: IYjsConnectionListener): void {
+    this.registerListener(fileShareManager);
+  }
+
+  sendLocalFileToPeers(fileKey: string): Editor {
+    console.debug("Sending local file to remote: " + fileKey);
+
+    const remoteFile = new PeerFileMap(this.currentPeerName, fileKey);
+
+    // group changes into a single transaction
+    // and notifies all listeners of the change
+    this.doc.transact(() => {
+      this.currentFiles.set(fileKey, remoteFile);
+    }, this.currentPeerName);
+
+    if (!this.peersEditorChannels.has(this.currentPeerName)) {
+      this.peersEditorChannels.set(
+        this.currentPeerName,
+        new Map<string, Editor>()
+      );
+    }
+    console.log(
+      "sendLocalFileToRemote: creating new editor channel for file: ",
+      fileKey,
+      " and peer: ",
+      this.currentPeerName
+    );
+
+    const editorChannel = new Editor(
+      this.doc,
+      this.currentPeerName,
+      remoteFile
+    );
+    this.peersEditorChannels
+      .get(this.currentPeerName)!
+      .set(fileKey, editorChannel);
+    return editorChannel;
+  }
+
+  deleteLocalFile(fileKey: string): void {
+    console.log(
+      "Deleting local file: " + fileKey + "peerName: " + this.currentPeerName
+    );
+    if (!this.peersEditorChannels.has(this.currentPeerName)) {
+      console.error(
+        "No editor channels found for peer: " + this.currentPeerName
+      );
+      return;
+    }
+
+    let filesMap = this.peersEditorChannels.get(this.currentPeerName);
+    if (!filesMap) {
+      console.error("No files found for peer: " + this.currentPeerName);
+      return;
+    }
+    if (!filesMap.has(fileKey)) {
+      console.error("No file found for key: " + fileKey);
+      return;
+    }
+    filesMap.delete(fileKey);
+    this.doc.transact(() => {
+      this.currentFiles.delete(fileKey);
+    }, this.currentPeerName);
+    this.currentFiles.delete(fileKey);
   }
 
   private setupObservers(): void {
@@ -82,7 +147,7 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
     });
   }
 
-  addPeer(peerName: string, files: Y.Map<Y.Map<unknown>>): void {
+  private addPeer(peerName: string, files: Y.Map<Y.Map<unknown>>): void {
     console.debug("Peer joined: " + peerName);
     if (peerName == this.currentPeerName) {
       return;
@@ -96,7 +161,7 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
     this.addObserversForFileList(peerName, files);
     this.peerConnectionListener.peerJoined(new Peer(peerName));
   }
-  addObserversForFileList(
+  private addObserversForFileList(
     peerName: string,
     files: Y.Map<Y.Map<unknown>>
   ): void {
@@ -112,11 +177,8 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
     };
     files.observe(fileChangeEventListener);
   }
-  addRemoteFileListener(fileShareManager: IPeerFileListener): void {
-    this.registerListener(fileShareManager);
-  }
 
-  deletePeerFile(peerName: string, fileKey: string): void {
+  private deletePeerFile(peerName: string, fileKey: string): void {
     console.log("Peer: " + peerName + " deleted file: " + fileKey);
     if (!this.peersEditorChannels.has(peerName)) {
       console.error("No editor channels found for peer: " + peerName);
@@ -142,34 +204,7 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
     this.currentFiles.delete(fileKey);
   }
 
-  deleteLocalFile(fileKey: string): void {
-    console.log(
-      "Deleting local file: " + fileKey + "peerName: " + this.currentPeerName
-    );
-    if (!this.peersEditorChannels.has(this.currentPeerName)) {
-      console.error(
-        "No editor channels found for peer: " + this.currentPeerName
-      );
-      return;
-    }
-
-    let filesMap = this.peersEditorChannels.get(this.currentPeerName);
-    if (!filesMap) {
-      console.error("No files found for peer: " + this.currentPeerName);
-      return;
-    }
-    if (!filesMap.has(fileKey)) {
-      console.error("No file found for key: " + fileKey);
-      return;
-    }
-    filesMap.delete(fileKey);
-    this.doc.transact(() => {
-      this.currentFiles.delete(fileKey);
-    }, this.currentPeerName);
-    this.currentFiles.delete(fileKey);
-  }
-
-  addPeerFile(
+  private addPeerFile(
     peerName: string,
     fileKey: string,
     file: Y.Map<unknown> | undefined
@@ -183,7 +218,7 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
     console.log("Remote file: ", remoteFile.peerFileKey);
 
     if (!this.peersEditorChannels.has(peerName)) {
-      this.peersEditorChannels.set(peerName, new Map<string, EditorChannel>());
+      this.peersEditorChannels.set(peerName, new Map<string, Editor>());
     }
 
     let editorChannel = this.peersEditorChannels.get(peerName)!.get(fileKey);
@@ -195,16 +230,13 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
         " and peer: ",
         peerName
       );
-      editorChannel = new EditorChannel(
-        this.doc,
-        this.currentPeerName,
-        remoteFile
-      );
+      editorChannel = new Editor(this.doc, this.currentPeerName, remoteFile);
       this.peersEditorChannels.get(peerName)!.set(fileKey, editorChannel);
     }
 
     const constEditorChannelReference = editorChannel;
     this.notifyListeners(async (listener) => {
+      // call a specific callback for addPeerFile to all listeners
       await listener.onRemoteFileAddedByPeer(
         remoteFile.peerFileKey,
         constEditorChannelReference
@@ -212,44 +244,11 @@ export class YjsListener extends ObservedBy<IPeerFileListener> {
     });
   }
 
-  deletePeer(peerName: string): void {
+  private deletePeer(peerName: string): void {
     console.log("Deleting Peer: " + peerName + " form the session");
     if (!this.peersEditorChannels.has(peerName)) {
       console.error("No peer found with name: " + peerName);
       return;
     }
-  }
-
-  sendLocalFileToPeers(fileKey: string): IEditorChannel {
-    console.debug("Sending local file to remote: " + fileKey);
-
-    const remoteFile = new PeerFileMap(this.currentPeerName, fileKey);
-
-    this.doc.transact(() => {
-      this.currentFiles.set(fileKey, remoteFile);
-    }, this.currentPeerName);
-
-    if (!this.peersEditorChannels.has(this.currentPeerName)) {
-      this.peersEditorChannels.set(
-        this.currentPeerName,
-        new Map<string, EditorChannel>()
-      );
-    }
-    console.log(
-      "sendLocalFileToRemote: creating new editor channel for file: ",
-      fileKey,
-      " and peer: ",
-      this.currentPeerName
-    );
-
-    const editorChannel = new EditorChannel(
-      this.doc,
-      this.currentPeerName,
-      remoteFile
-    );
-    this.peersEditorChannels
-      .get(this.currentPeerName)!
-      .set(fileKey, editorChannel);
-    return editorChannel;
   }
 }

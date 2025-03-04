@@ -1,21 +1,15 @@
 import { get } from "http";
 import { ObservedBy } from "../ObservedBy";
-import { DocumentChannel } from "../document/DocumentChannel";
-import { IDocumentChannel } from "../models/IDocumentChannel";
+import { Document } from "../document/Document";
 import { PeerFileMap } from "../models/PeerFile";
 import { Peer } from "../models/Peer";
 import { PeerSelection, Selection } from "../models/EditorStructs";
-import {
-  IEditorChannel,
-  IEditorChannelListener,
-} from "../models/IEditorChannel";
+import { IEditorListener } from "../models/IEditor";
 import * as Y from "yjs";
 
-export class EditorChannel
-  extends ObservedBy<IEditorChannelListener>
-  implements IEditorChannel
-{
-  private readonly documentChannel: DocumentChannel;
+// change name to Editor
+export class Editor extends ObservedBy<IEditorListener> {
+  private readonly documentChannel: Document;
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
@@ -34,18 +28,14 @@ export class EditorChannel
     // handle changes to the peer selections using the peerSelectionEventListener
     // observe is a Yjs method that listens for changes to a Y.Array type
     this.yjsFile.peerSelections.observe(peerSelectionEventListener);
-    this.documentChannel = new DocumentChannel(
-      yjsDoc,
-      currentUserName,
-      yjsFile
-    );
+    this.documentChannel = new Document(yjsDoc, currentUserName, yjsFile);
   }
 
-  addEditorChannelListener(listener: IEditorChannelListener): void {
+  addEditorChannelListener(listener: IEditorListener): void {
     super.registerListener(listener);
   }
 
-  getDocumentChannel(): IDocumentChannel {
+  getDocumentChannel(): Document {
     return this.documentChannel;
   }
 
@@ -116,7 +106,7 @@ export class EditorChannel
         peerChangingSelections
       );
 
-      this.notifyListeners((listener: IEditorChannelListener) =>
+      this.notifyListeners((listener: IEditorListener) =>
         listener.onSelectionsChangedForPeerInFile(
           peerSelections,
           peerChangingSelections,

@@ -6,16 +6,11 @@ import {
   getPositionFromIndex,
 } from "../editor/editorUtils";
 import { PeerFileMap } from "../models/PeerFile";
-import {
-  IDocumentChannel,
-  IDocumentChannelListener,
-} from "../models/IDocumentChannel";
+import { IDocumentListener as IDocumentListener } from "../models/IDocument";
 import * as Y from "yjs";
 
-export class DocumentChannel
-  extends ObservedBy<IDocumentChannelListener>
-  implements IDocumentChannel
-{
+// change name to Document
+export class Document extends ObservedBy<IDocumentListener> {
   private currentText: string = "";
   constructor(
     private yjsDoc: Y.Doc,
@@ -40,7 +35,7 @@ export class DocumentChannel
       );
     }
   }
-  addDocumentListener(listener: IDocumentChannelListener): void {
+  addDocumentListener(listener: IDocumentListener): void {
     super.registerListener(listener);
   }
 

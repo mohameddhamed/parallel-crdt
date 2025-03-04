@@ -12,7 +12,7 @@ import { SessionManager } from "./session/SessionManager";
 import { Facade } from "./facade";
 import { SessionTreeDataProvider } from "./Tree/SessionTreeDataProvider";
 import { FileSystemManager } from "./file/FileSystemManager";
-import { YWebSocketConnector } from "./connection/YWebSocketConnector";
+import { Connector } from "./connection/Connector";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -144,7 +144,7 @@ function registerCommands(
 function init(context: vscode.ExtensionContext): void {
   const config = new Config();
   const sessionManager = new SessionManager(
-    new YWebSocketConnector(config.getParameterString("webSocketServerUrl"))
+    new Connector(config.getParameterString("webSocketServerUrl"))
   );
 
   const facade = new Facade(

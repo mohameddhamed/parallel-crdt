@@ -1,17 +1,15 @@
 import * as vscode from "vscode";
-import {
-  IDocumentChannel,
-  IDocumentChannelListener,
-} from "../models/IDocumentChannel";
+import { IDocumentListener } from "../models/IDocument";
 import { Position, TextChange, TextChangeType } from "../models/EditorStructs";
 import { getVsCodeRange } from "../editor/editorUtils";
+import { Document } from "./Document";
 
-export default class DocumentListener implements IDocumentChannelListener {
+export default class DocumentListener implements IDocumentListener {
   public mutexIsLocked: boolean = false;
 
   constructor(
     public document: vscode.TextDocument,
-    public documentChannel: IDocumentChannel
+    public documentChannel: Document
   ) {
     this.documentChannel.addDocumentListener(this);
   }

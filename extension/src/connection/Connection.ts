@@ -1,12 +1,12 @@
 import { Doc } from "yjs";
 import { SocketProvider } from "../models/SocketProvider";
 import { Session } from "../session/Session";
-import { PeerManager } from "../peer/PeerManager";
+import { PeerConnection } from "../peer/PeerConnection";
 import { FileSystemManager } from "../file/FileSystemManager";
 import { FileShareManager } from "../file/FileShareManager";
-import { YjsListener } from "../yjs/YjsListener";
+import { YjsConnection } from "../yjs/YjsConnection";
 
-export class YWebSocketConnection {
+export class Connection {
   private readonly session: Session;
   constructor(
     private provider: SocketProvider,
@@ -19,8 +19,12 @@ export class YWebSocketConnection {
   }
 
   private createNewSession(): Session {
-    const peerManager = new PeerManager();
-    const yjsListener = new YjsListener(this.ydoc, this.username, peerManager);
+    const peerManager = new PeerConnection();
+    const yjsListener = new YjsConnection(
+      this.ydoc,
+      this.username,
+      peerManager
+    );
     const fileShareManager = new FileShareManager(
       yjsListener,
       FileSystemManager.getFileSystemManagerInstance()

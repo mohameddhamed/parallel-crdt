@@ -1,14 +1,14 @@
-import { IDocumentChannel } from "./IDocumentChannel";
 import { Peer } from "./Peer";
 import { Selection } from "./EditorStructs";
+import { Document } from "../document/Document";
 
-export interface IEditorChannel {
-  addEditorChannelListener(listener: IEditorChannelListener): void;
-  getDocumentChannel(): IDocumentChannel;
+export interface IEditor {
+  addEditorChannelListener(listener: IEditorListener): void;
+  getDocumentChannel(): Document;
   sendLocalSelectionsToRemote(selections: Selection[]): void;
 }
 
-export interface IEditorChannelListener {
+export interface IEditorListener {
   onSelectionsChangedForPeerInFile(
     selections: Selection[],
     peerName: string,

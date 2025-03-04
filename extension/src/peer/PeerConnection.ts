@@ -2,7 +2,7 @@ import { ObservedBy } from "../ObservedBy";
 import { Peer } from "../models/Peer";
 import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
 
-export class PeerManager extends ObservedBy<IPeerConnectionListener> {
+export class PeerConnection extends ObservedBy<IPeerConnectionListener> {
   private peers: Peer[] = [];
 
   peerJoined(peer: Peer): void {

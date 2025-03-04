@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { SocketProvider } from "../models/SocketProvider";
-import { PeerManager } from "../peer/PeerManager";
+import { PeerConnection } from "../peer/PeerConnection";
 import { Peer } from "../models/Peer";
 import { FileShareManager } from "../file/FileShareManager";
 
@@ -11,7 +11,7 @@ export class Session {
     public readonly isOwner: boolean,
 
     private readonly userName: string,
-    private readonly peerManager: PeerManager,
+    private readonly peerManager: PeerConnection,
     private readonly shareLocalFileToRemote: FileShareManager
   ) {}
 
@@ -22,7 +22,7 @@ export class Session {
     return this.peerManager.getPeers();
   }
 
-  public getPeerManager(): PeerManager {
+  public getPeerManager(): PeerConnection {
     return this.peerManager;
   }
   public shareLocalFile(file: vscode.Uri): Promise<void> {

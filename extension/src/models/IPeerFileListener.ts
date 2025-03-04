@@ -1,10 +1,11 @@
 import * as vscode from "vscode";
-import { IEditorChannel } from "./IEditorChannel";
+import { IEditor } from "./IEditor";
+import { Editor } from "../editor/Editor";
 
-export interface IPeerFileListener {
+export interface IYjsConnectionListener {
   onRemoteFileAddedByPeer(
     fileUri: string,
-    editorChannel: IEditorChannel
+    editorChannel: Editor
   ): Promise<void>;
   onRemoteFileDeletedByPeer(fileName: string): void;
 }

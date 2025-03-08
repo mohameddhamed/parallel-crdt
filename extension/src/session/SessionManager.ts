@@ -1,14 +1,14 @@
 import { ObservedBy } from "../ObservedBy";
-import { ConnAuthenticationInfo } from "../models/ConnAuthenticationInfo";
+import { ConnAuthenticationInfo } from "../models/Classes";
 import { Connector } from "../connection/Connector";
 import { ISessionListener, Session } from "./Session";
 import * as vscode from "vscode";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 import { PeerConnection } from "../peer/PeerConnection";
-import { YjsConnection } from "../yjs/YjsConnection";
-import { FileShareManager } from "../file/FileShareManager";
-import { FileSystemManager } from "../file/FileSystemManager";
+import { YFileManager } from "../file/YFileManager";
+import { FileManager } from "../file/FileManager";
+import { FileManagerUtils } from "../file/FileManagerUtils";
 export class SessionManager extends ObservedBy<ISessionListener> {
   private sessions: Session[] = [];
 
@@ -49,13 +49,13 @@ export class SessionManager extends ObservedBy<ISessionListener> {
     isOwner,
   }: SessionData): Session {
     const peerManager = new PeerConnection();
-    const yjsListener = new YjsConnection(ydoc, username, peerManager);
-    const fileShareManager = new FileShareManager(
-      yjsListener,
-      FileSystemManager.getFileSystemManagerInstance()
+    const yFileManager = new YFileManager(ydoc, username, peerManager);
+    const fileShareManager = new FileManager(
+      yFileManager,
+      FileManagerUtils.getFileShareManagerUtilsInstance()
     );
 
-    yjsListener.addRemoteFileListener(fileShareManager);
+    yFileManager.addYFileManagerListener(fileShareManager);
 
     return new Session(
       roomName,

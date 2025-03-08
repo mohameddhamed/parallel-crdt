@@ -7,11 +7,10 @@ import { authenticate } from "./Authenticate";
 import { TokenManager } from "./TokenManager";
 import { initGlobal } from "./utils";
 import { Config } from "./Config";
-import { getWorkspaceFolderPath } from "./file/fileUtils";
 import { SessionManager } from "./session/SessionManager";
 import { Facade } from "./facade";
 import { SessionTreeDataProvider } from "./Tree/SessionTreeDataProvider";
-import { FileSystemManager } from "./file/FileSystemManager";
+import { FileManagerUtils } from "./file/FileManagerUtils";
 import { Connector } from "./connection/Connector";
 
 // This method is called when your extension is activated
@@ -149,7 +148,7 @@ function init(context: vscode.ExtensionContext): void {
 
   const facade = new Facade(
     sessionManager,
-    FileSystemManager.getFileSystemManagerInstance()
+    FileManagerUtils.getFileShareManagerUtilsInstance()
   );
   const treeProvider = new SessionTreeDataProvider(sessionManager);
   sessionManager.registerListener(treeProvider);

@@ -1,14 +1,6 @@
 import * as vscode from "vscode";
-import { getRandomColor } from "./editorUtils";
-
-class PeerEditorDecorator {
-  constructor(
-    public selectionDecoration: vscode.TextEditorDecorationType,
-    public cursorDecoration: vscode.TextEditorDecorationType,
-    public nameDecoration: vscode.TextEditorDecorationType
-  ) {}
-}
-
+import { getRandomColor } from "../models/Utils";
+import { PeerEditorDecorator } from "../models/Classes";
 export class PeerEditorDecoratorStore {
   // to prevent 2 peers from having the same decorator
   private static instance: PeerEditorDecoratorStore;

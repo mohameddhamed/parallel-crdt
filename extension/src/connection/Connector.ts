@@ -1,6 +1,6 @@
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
-import { ConnAuthenticationInfo } from "../models/ConnAuthenticationInfo";
+import { ConnAuthenticationInfo } from "../models/Classes";
 import { SessionData } from "../session/SessionManager";
 
 export class Connector {

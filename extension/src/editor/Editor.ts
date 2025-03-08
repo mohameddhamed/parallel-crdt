@@ -1,15 +1,14 @@
 import { get } from "http";
 import { ObservedBy } from "../ObservedBy";
 import { Document } from "../document/Document";
-import { PeerFileMap } from "../models/PeerFile";
-import { Peer } from "../models/Peer";
-import { PeerSelection, Selection } from "../models/EditorStructs";
-import { IEditorListener } from "../models/IEditorListener";
+import { PeerFileMap } from "../models/Classes";
+import { PeerSelection, Selection } from "../models/Classes";
+import { IEditorListener } from "../models/Interfaces";
 import * as Y from "yjs";
 
 // change name to Editor
 export class Editor extends ObservedBy<IEditorListener> {
-  private readonly documentChannel: Document;
+  private readonly document: Document;
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
@@ -28,15 +27,15 @@ export class Editor extends ObservedBy<IEditorListener> {
     // handle changes to the peer selections using the peerSelectionEventListener
     // observe is a Yjs method that listens for changes to a Y.Array type
     this.yjsFile.peerSelections.observe(peerSelectionEventListener);
-    this.documentChannel = new Document(yjsDoc, currentUserName, yjsFile);
+    this.document = new Document(yjsDoc, currentUserName, yjsFile);
   }
 
-  addEditorChannelListener(listener: IEditorListener): void {
+  addEditorListener(listener: IEditorListener): void {
     super.registerListener(listener);
   }
 
-  getDocumentChannel(): Document {
-    return this.documentChannel;
+  getDocument(): Document {
+    return this.document;
   }
 
   sendLocalSelectionsToRemote(localSelections: Selection[]): Promise<void> {

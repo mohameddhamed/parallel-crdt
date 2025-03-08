@@ -1,17 +1,15 @@
 import * as fs from "fs";
 import * as vscode from "vscode";
 import { FileStore } from "../file/FileStore";
-import { FileShareManager } from "../file/FileShareManager";
-export interface IDocumentManger {
-  initializeLocalTextToRemote(document: vscode.TextDocument): void;
-}
+import { FileManager } from "../file/FileManager";
 
-export class DocumentManager implements IDocumentManger {
+export class DocumentManager {
   constructor(
     private fileStore: FileStore,
-    private sharerFromLocalToRemote: FileShareManager
+    private sharerFromLocalToPeers: FileManager
   ) {
-    // COME BACK TO THIS LATER
+    // .bind(this) is used to ensure that the event handler methods
+    // have the correct this context when they are called by the VS Code event system.
     vscode.workspace.onDidChangeTextDocument(
       this.onChangeLocalTextDocument.bind(this)
     );
@@ -23,11 +21,13 @@ export class DocumentManager implements IDocumentManger {
     vscode.workspace.onDidRenameFiles(this.onRenameFiles.bind(this));
   }
 
-  public initializeLocalTextToRemote(document: vscode.TextDocument): void {
+  public syncInitialLocalText(document: vscode.TextDocument): void {
     try {
       const initialLocalText = document.getText();
       const changeEventObject = {
         document: document,
+        // a single change that represents the entire
+        // content of the document being inserted at the beginning.
         contentChanges: [
           {
             range: new vscode.Range(
@@ -88,13 +88,13 @@ export class DocumentManager implements IDocumentManger {
       if (fs.lstatSync(file.fsPath).isDirectory()) {
         return; // ignore directories
       }
-      this.sharerFromLocalToRemote.shareLocalFileToRemote(file);
+      this.sharerFromLocalToPeers.shareLocalFileToPeers(file);
     });
   }
   private onDeleteFiles(e: vscode.FileDeleteEvent): void {
     console.log("handling file delete event: ", e.files);
     e.files.forEach((file) => {
-      this.sharerFromLocalToRemote.deleteLocalFile(file);
+      this.sharerFromLocalToPeers.deleteLocalFile(file);
     });
   }
   // Come back to this later

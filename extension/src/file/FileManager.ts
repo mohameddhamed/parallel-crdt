@@ -1,28 +1,49 @@
 import * as vscode from "vscode";
-import { FileSystemManager } from "./FileSystemManager";
-import { getAllFilesInDir, getFileKeyFromUri } from "./fileUtils";
+import { FileManagerUtils } from "./FileManagerUtils";
+import { getAllFilesInDir, getFileKeyFromUri } from "../models/Utils";
 import EditorListener from "../editor/EditorListener";
-import { IYjsConnectionListener } from "../models/IPeerFileListener";
+import { IYFileManagerListener } from "../models/Interfaces";
 import { FileStore, StoreFile } from "./FileStore";
-import { EditorManager, IEditorManager } from "../editor/EditorManager";
-import { DocumentManager, IDocumentManger } from "../document/DocumentManager";
+import { EditorManager } from "../editor/EditorManager";
+import { DocumentManager } from "../document/DocumentManager";
 import DocumentListener from "../document/DocumentListener";
-import { YjsConnection } from "../yjs/YjsConnection";
+import { YFileManager } from "./YFileManager";
 import { Editor } from "../editor/Editor";
+import { Session } from "../session/Session";
 
-export class FileShareManager implements IYjsConnectionListener {
+export class FileManager implements IYFileManagerListener {
   private fileStore = new FileStore();
-  private documentManager: IDocumentManger = new DocumentManager(
+  private documentManager: DocumentManager = new DocumentManager(
     this.fileStore,
     this
   );
-  private editorManager: IEditorManager = new EditorManager(this.fileStore);
+  private editorManager: EditorManager = new EditorManager(this.fileStore);
 
   constructor(
-    private yjsConnectionHandler: YjsConnection,
-    private fileSystemManager: FileSystemManager
+    private yFileManager: YFileManager,
+    private fileShareManagerUtils: FileManagerUtils
   ) {}
-  async shareLocalFileToRemote(fileUri: vscode.Uri): Promise<void> {
+
+  async shareLocalFilesToPeers(workspaceFolderPath: string): Promise<void> {
+    // Share all files in the workspace
+    if (!workspaceFolderPath) {
+      console.error("Workspace path is not set");
+      return;
+    }
+    // Get all files in the workspace
+    const workspaceFiles = await getAllFilesInDir(workspaceFolderPath);
+    console.log("Sharing all files in the workspace: ", workspaceFiles);
+    // Share each file
+    for (const file of workspaceFiles) {
+      try {
+        await this.shareLocalFileToPeers(file);
+      } catch (e) {
+        console.error("Error sharing file: ", e, file);
+      }
+    }
+  }
+
+  async shareLocalFileToPeers(fileUri: vscode.Uri): Promise<void> {
     console.log("FileShareManager: Sharing file with URI: ", fileUri.fsPath);
 
     const fileKey = getFileKeyFromUri(fileUri);
@@ -32,18 +53,17 @@ export class FileShareManager implements IYjsConnectionListener {
       console.log("File already shared and exists for file key: ", fileKey);
     }
 
-    const editorChannel =
-      this.yjsConnectionHandler.sendLocalFileToPeers(fileKey);
+    const editorChannel = this.yFileManager.shareLocalFileToPeers(fileKey);
     sharedFile = await this.createAndSaveSharedFile(
       fileKey,
       fileUri,
       editorChannel
     );
-    this.documentManager.initializeLocalTextToRemote(sharedFile!.textDocument);
+    this.documentManager.syncInitialLocalText(sharedFile!.textDocument);
   }
   async deleteLocalDir(dirUri: vscode.Uri): Promise<void> {
     (await getAllFilesInDir(dirUri.fsPath)).forEach((fileUri) => {
-      this.fileSystemManager.deleteFile(fileUri);
+      this.fileShareManagerUtils.deleteFileLocally(fileUri);
     });
   }
 
@@ -52,7 +72,7 @@ export class FileShareManager implements IYjsConnectionListener {
     editorChannel: Editor
   ): Promise<void> {
     console.log("FileShareManager: Remote file : ", fileKey, " added by peer");
-    const localFileUri = this.fileSystemManager.addFileToWorkspace(fileKey);
+    const localFileUri = this.fileShareManagerUtils.addFileLocally(fileKey);
     if (!localFileUri) {
       console.warn(
         "FileShareManager: Error adding file to workspace: ",
@@ -83,7 +103,7 @@ export class FileShareManager implements IYjsConnectionListener {
     const documentOpened = await this.editorManager.openTextDocument(fileUri);
     const documentListener = new DocumentListener(
       documentOpened,
-      editorChannel.getDocumentChannel()
+      editorChannel.getDocument()
     );
 
     const sharedPeerFile = new StoreFile(
@@ -106,8 +126,8 @@ export class FileShareManager implements IYjsConnectionListener {
       return;
     }
     this.fileStore.removeFileFromStore(peerFile.key);
-    this.fileSystemManager.deleteFile(
-      this.fileSystemManager.getUriOfFile(fileKey)
+    this.fileShareManagerUtils.deleteFileLocally(
+      this.fileShareManagerUtils.getUriOfFile(fileKey)
     );
   }
   deleteLocalFile(fileUri: vscode.Uri): void {
@@ -122,7 +142,7 @@ export class FileShareManager implements IYjsConnectionListener {
       console.warn("FileShareManager: No file found with name: ", fileKey);
       return;
     }
-    this.yjsConnectionHandler.deleteLocalFile(fileKey);
+    this.yFileManager.deleteLocalFile(fileKey);
     this.fileStore.removeFileFromStore(fileKey);
   }
 }

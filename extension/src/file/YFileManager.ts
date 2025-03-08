@@ -1,14 +1,14 @@
 import { ObservedBy } from "../ObservedBy";
-import { IYjsConnectionListener } from "../models/IPeerFileListener";
+import { IYFileManagerListener } from "../models/Interfaces";
 import * as Y from "yjs";
 import { PeerConnection } from "../peer/PeerConnection";
-import { Peer } from "../models/Peer";
-import { PeerFileMap } from "../models/PeerFile";
+import { Peer } from "../models/Classes";
+import { PeerFileMap } from "../models/Classes";
 import { Editor } from "../editor/Editor";
-import { PeerFileFieldKeys } from "./yjsUtils";
+import { PeerFileFieldKeys } from "../yjs/yjsUtils";
 
 // RemoteFileListener listens for all YjsListner events
-export class YjsConnection extends ObservedBy<IYjsConnectionListener> {
+export class YFileManager extends ObservedBy<IYFileManagerListener> {
   // map peerId -> fileKey -> file
   private peers: Y.Map<Y.Map<Y.Map<unknown>>>;
   // map fileKey -> file
@@ -25,11 +25,11 @@ export class YjsConnection extends ObservedBy<IYjsConnectionListener> {
     this.setupObservers();
   }
 
-  addRemoteFileListener(fileShareManager: IYjsConnectionListener): void {
+  addYFileManagerListener(fileShareManager: IYFileManagerListener): void {
     this.registerListener(fileShareManager);
   }
 
-  sendLocalFileToPeers(fileKey: string): Editor {
+  shareLocalFileToPeers(fileKey: string): Editor {
     console.debug("Sending local file to remote: " + fileKey);
 
     const remoteFile = new PeerFileMap(this.currentPeerName, fileKey);

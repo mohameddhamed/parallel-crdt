@@ -1,6 +1,6 @@
 import { ObservedBy } from "../ObservedBy";
-import { Peer } from "../models/Peer";
-import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
+import { Peer } from "../models/Classes";
+import { IPeerConnectionListener } from "../models/Interfaces";
 
 export class PeerConnection extends ObservedBy<IPeerConnectionListener> {
   private peers: Peer[] = [];

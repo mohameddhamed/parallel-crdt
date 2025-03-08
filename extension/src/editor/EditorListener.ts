@@ -1,13 +1,13 @@
 import * as vscode from "vscode";
 import { PeerEditorDecoratorStore } from "./EditorDecoration";
-import { IEditorListener } from "../models/IEditorListener";
-import { Position, Selection } from "../models/EditorStructs";
+import { IEditorListener } from "../models/Interfaces";
+import { Position, Selection } from "../models/Classes";
 import { get } from "http";
 import {
   convertPositionToVsCodePosition,
   convertVsCodePositionToPosition,
-} from "./editorUtils";
-import { getFileKeyFromUri } from "../file/fileUtils";
+} from "../models/Utils";
+import { getFileKeyFromUri } from "../models/Utils";
 import { Editor } from "./Editor";
 
 export default class EditorListener implements IEditorListener {
@@ -15,7 +15,7 @@ export default class EditorListener implements IEditorListener {
   constructor(public editorChannel: Editor) {
     // Register an instance of EditorListener as a listener for events or changes that occur within the IEditorChannel.
     // This allows the EditorListener to respond to these events and perform actions accordingly.
-    this.editorChannel.addEditorChannelListener(this);
+    this.editorChannel.addEditorListener(this);
   }
 
   onSelectionsChangedForPeerInFile(

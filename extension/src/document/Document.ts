@@ -1,29 +1,27 @@
-import { get } from "http";
 import { ObservedBy } from "../ObservedBy";
-import { TextChange, TextChangeType } from "../models/EditorStructs";
-import {
-  getIndexFromPosition,
-  getPositionFromIndex,
-} from "../editor/editorUtils";
-import { PeerFileMap } from "../models/PeerFile";
-import { IDocumentListener as IDocumentListener } from "../models/IDocumentListener";
+import { TextChange, TextChangeType } from "../models/Classes";
+import { getIndexFromPosition, getPositionFromIndex } from "../models/Utils";
+import { PeerFileMap } from "../models/Classes";
+import { IDocumentListener as IDocumentListener } from "../models/Interfaces";
 import * as Y from "yjs";
 
 // change name to Document
 export class Document extends ObservedBy<IDocumentListener> {
-  private currentText: string = "";
+  // A local representation of the document's text content
+  // used for tracking text changes
+  private currentDocumentTextState: string = "";
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
     public yjsFile: PeerFileMap
   ) {
     super();
-    this.initObservers();
+    this.setupDocumentListeners();
 
     // Notify listeners of the initial text
     if (this.yjsFile.peerText.length > 0) {
-      this.currentText = this.yjsFile.peerText.toString();
-      const text = this.currentText;
+      this.currentDocumentTextState = this.yjsFile.peerText.toString();
+      const text = this.currentDocumentTextState;
       console.log(
         "DocumentChannel: constructor: text: ",
         text,
@@ -31,7 +29,7 @@ export class Document extends ObservedBy<IDocumentListener> {
         text.length
       );
       this.notifyListeners(
-        async (listener) => await listener.onRemoteTextInitialized(text)
+        async (listener) => await listener.onPeerTextInitialized(text)
       );
     }
   }
@@ -56,8 +54,14 @@ export class Document extends ObservedBy<IDocumentListener> {
       "DocumentChannel: transactAndApplyChange: textChange: ",
       textChange
     );
-    const indexBegin = getIndexFromPosition(this.currentText, textChange.start);
-    const indexEnd = getIndexFromPosition(this.currentText, textChange.end);
+    const indexBegin = getIndexFromPosition(
+      this.currentDocumentTextState,
+      textChange.start
+    );
+    const indexEnd = getIndexFromPosition(
+      this.currentDocumentTextState,
+      textChange.end
+    );
 
     this.transactTextChange(textChange, indexBegin, indexEnd);
     this.applyTextChange(textChange);
@@ -68,9 +72,6 @@ export class Document extends ObservedBy<IDocumentListener> {
       this.yjsFile.peerSaveRequests.push([this.currentUserName]);
     }, this.currentUserName);
   }
-  // addDocumentChannelListener(listener: IDocumentChannelListener): void {
-  //   super.registerListener(listener);
-  // }
   private transactTextChange(
     textChange: TextChange,
     indexBegin: number,
@@ -91,7 +92,7 @@ export class Document extends ObservedBy<IDocumentListener> {
     }, this.currentUserName);
   }
 
-  private initObservers(): void {
+  private setupDocumentListeners(): void {
     const yjsTextEventListener = async (
       event: Y.YTextEvent,
       transaction: Y.Transaction
@@ -99,7 +100,7 @@ export class Document extends ObservedBy<IDocumentListener> {
       if (transaction.origin === this.currentUserName) {
         return;
       }
-      await this.onRemoteTextChanged(event);
+      await this.onPeerTextChanged(event);
     };
     const yjsSaveRequestEventListener = (
       event: Y.YArrayEvent<string>,
@@ -114,7 +115,7 @@ export class Document extends ObservedBy<IDocumentListener> {
     this.yjsFile.peerSaveRequests.observe(yjsSaveRequestEventListener);
   }
 
-  private async onRemoteTextChanged(event: Y.YTextEvent): Promise<void> {
+  private async onPeerTextChanged(event: Y.YTextEvent): Promise<void> {
     const textChanges: TextChange[] = [];
     let textPosition = 0;
 
@@ -125,8 +126,11 @@ export class Document extends ObservedBy<IDocumentListener> {
       } else if (delta.delete) {
         const textToBeDeleted = new TextChange(
           TextChangeType.DELETE,
-          getPositionFromIndex(this.currentText, textPosition),
-          getPositionFromIndex(this.currentText, textPosition + delta.delete),
+          getPositionFromIndex(this.currentDocumentTextState, textPosition),
+          getPositionFromIndex(
+            this.currentDocumentTextState,
+            textPosition + delta.delete
+          ),
           ""
         );
         textChanges.push(textToBeDeleted);
@@ -134,8 +138,8 @@ export class Document extends ObservedBy<IDocumentListener> {
       } else if (delta.insert) {
         const textToBeInserted = new TextChange(
           TextChangeType.INSERT,
-          getPositionFromIndex(this.currentText, textPosition),
-          getPositionFromIndex(this.currentText, textPosition),
+          getPositionFromIndex(this.currentDocumentTextState, textPosition),
+          getPositionFromIndex(this.currentDocumentTextState, textPosition),
           delta.insert as string
         );
         textChanges.push(textToBeInserted);
@@ -146,8 +150,7 @@ export class Document extends ObservedBy<IDocumentListener> {
     const reversedTextChanges = [...textChanges].reverse();
 
     this.notifyListeners(
-      async (listener) =>
-        await listener.onRemoteTextChanged(reversedTextChanges)
+      async (listener) => await listener.onPeerTextChanged(reversedTextChanges)
     );
   }
 
@@ -165,10 +168,16 @@ export class Document extends ObservedBy<IDocumentListener> {
     }
   }
   private applyTextChange(textChange: TextChange): void {
-    const indexBegin = getIndexFromPosition(this.currentText, textChange.start);
-    const indexEnd = getIndexFromPosition(this.currentText, textChange.end);
-    const beginText = this.currentText.slice(0, indexBegin);
-    const endText = this.currentText.slice(indexEnd);
-    this.currentText = `${beginText}${textChange.text}${endText}`;
+    const indexBegin = getIndexFromPosition(
+      this.currentDocumentTextState,
+      textChange.start
+    );
+    const indexEnd = getIndexFromPosition(
+      this.currentDocumentTextState,
+      textChange.end
+    );
+    const beginText = this.currentDocumentTextState.slice(0, indexBegin);
+    const endText = this.currentDocumentTextState.slice(indexEnd);
+    this.currentDocumentTextState = `${beginText}${textChange.text}${endText}`;
   }
 }

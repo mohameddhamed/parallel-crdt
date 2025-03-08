@@ -1,8 +1,49 @@
-import { Selection } from "vscode";
+import * as vscode from "vscode";
 import * as Y from "yjs";
-import { PeerSelection } from "./EditorStructs";
 import { PeerFileFieldKeys } from "../yjs/yjsUtils";
-import { Peer } from "./Peer";
+export class ConnAuthenticationInfo {
+  constructor(
+    public username: string,
+    public roomName: string,
+    public password: string | null = null
+  ) {}
+}
+export class Position {
+  constructor(public row: number, public column: number) {}
+}
+
+export class Selection {
+  constructor(
+    public id: string,
+    public reversed: boolean,
+    public isCursor: boolean,
+    public start: Position,
+    public end: Position
+  ) {}
+}
+
+export enum TextChangeType {
+  INSERT,
+  DELETE,
+  UPDATE,
+}
+
+export class TextChange {
+  constructor(
+    public type: TextChangeType,
+    public start: Position,
+    public end: Position,
+    public text: string
+  ) {}
+}
+
+export class PeerSelection {
+  constructor(public peerName: string, public selection: Selection) {}
+}
+
+export class Peer {
+  constructor(public peerName: string) {}
+}
 
 export class PeerFileMap extends Y.Map<any> {
   constructor(
@@ -62,4 +103,12 @@ export class PeerFileMap extends Y.Map<any> {
   public set peerSaveRequests(value: Y.Array<string>) {
     this.set(PeerFileFieldKeys.peerSaveRequestsKey, value);
   }
+}
+
+export class PeerEditorDecorator {
+  constructor(
+    public selectionDecoration: vscode.TextEditorDecorationType,
+    public cursorDecoration: vscode.TextEditorDecorationType,
+    public nameDecoration: vscode.TextEditorDecorationType
+  ) {}
 }

@@ -1,10 +1,6 @@
 import * as vscode from "vscode";
 import { FileStore } from "../file/FileStore";
-export interface IEditorManager {
-  openTextDocument(documentUri: vscode.Uri): Promise<vscode.TextDocument>;
-}
-
-export class EditorManager implements IEditorManager {
+export class EditorManager {
   constructor(private fileStore: FileStore) {
     // review
     vscode.window.onDidChangeTextEditorSelection(

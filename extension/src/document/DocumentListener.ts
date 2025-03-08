@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
-import { IDocumentListener } from "../models/IDocumentListener";
-import { Position, TextChange, TextChangeType } from "../models/EditorStructs";
-import { getVsCodeRange } from "../editor/editorUtils";
+import { IDocumentListener } from "../models/Interfaces";
+import { Position, TextChange, TextChangeType } from "../models/Classes";
+import { getVsCodeRange } from "../models/Utils";
 import { Document } from "./Document";
 
 export default class DocumentListener implements IDocumentListener {
@@ -13,7 +13,7 @@ export default class DocumentListener implements IDocumentListener {
   ) {
     this.documentChannel.addDocumentListener(this);
   }
-  public async onRemoteTextInitialized(text: string): Promise<void> {
+  public async onPeerTextInitialized(text: string): Promise<void> {
     console.log("DocumentListener: Remote text initialized: ", text);
     // specifies a range of text to be edited and the new text to be
     // inserted or used to replace the existing text.
@@ -25,7 +25,7 @@ export default class DocumentListener implements IDocumentListener {
     await this.applyTextEdits(this.document, [textInitializedEdit]);
   }
 
-  public async onRemoteTextChanged(textChanges: TextChange[]): Promise<void> {
+  public async onPeerTextChanged(textChanges: TextChange[]): Promise<void> {
     console.log("DocumentListener: Remote text changed: ", textChanges.length);
     const textChangedEdits = textChanges.map((textChange) => {
       return new vscode.TextEdit(

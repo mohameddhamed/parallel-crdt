@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import DocumentListener from "../document/DocumentListener";
 import EditorListener from "../editor/EditorListener";
-import { getFileKeyFromUri } from "./fileUtils";
+import { getFileKeyFromUri } from "../models/Utils";
 import { Editor } from "../editor/Editor";
 
 export class FileStore {

@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { PeerConnection } from "../peer/PeerConnection";
-import { Peer } from "../models/Peer";
-import { FileShareManager } from "../file/FileShareManager";
+import { Peer } from "../models/Classes";
+import { FileManager } from "../file/FileManager";
 import { WebsocketProvider } from "y-websocket";
 
 export class Session {
@@ -12,7 +12,7 @@ export class Session {
 
     private readonly userName: string,
     private readonly peerManager: PeerConnection,
-    private readonly shareLocalFileToRemote: FileShareManager
+    public readonly fileShareManager: FileManager
   ) {}
 
   public getUserName(): string {
@@ -26,7 +26,7 @@ export class Session {
     return this.peerManager;
   }
   public shareLocalFile(file: vscode.Uri): Promise<void> {
-    return this.shareLocalFileToRemote.shareLocalFileToRemote(file);
+    return this.fileShareManager.shareLocalFileToPeers(file);
   }
   public getRoomName(): string {
     return this.roomName;

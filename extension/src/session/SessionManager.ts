@@ -3,7 +3,12 @@ import { ConnAuthenticationInfo } from "../models/ConnAuthenticationInfo";
 import { Connector } from "../connection/Connector";
 import { ISessionListener, Session } from "./Session";
 import * as vscode from "vscode";
-
+import { WebsocketProvider } from "y-websocket";
+import * as Y from "yjs";
+import { PeerConnection } from "../peer/PeerConnection";
+import { YjsConnection } from "../yjs/YjsConnection";
+import { FileShareManager } from "../file/FileShareManager";
+import { FileSystemManager } from "../file/FileSystemManager";
 export class SessionManager extends ObservedBy<ISessionListener> {
   private sessions: Session[] = [];
 
@@ -13,11 +18,11 @@ export class SessionManager extends ObservedBy<ISessionListener> {
 
   async startNewSession(isOwner: boolean = false): Promise<Session> {
     const authenticationInfo = await getSessionInfoFromUserInput();
-    const connection = await this.connector.connect(
+    const sessionData = await this.connector.connect(
       authenticationInfo,
       isOwner
     );
-    const session = connection.getSession();
+    const session = this.getSession(sessionData);
     this.addSession(session);
     return session;
   }
@@ -36,6 +41,31 @@ export class SessionManager extends ObservedBy<ISessionListener> {
     // Shallow copy | Encapsulation
     return this.sessions;
   }
+  private getSession({
+    provider,
+    ydoc,
+    username,
+    roomName,
+    isOwner,
+  }: SessionData): Session {
+    const peerManager = new PeerConnection();
+    const yjsListener = new YjsConnection(ydoc, username, peerManager);
+    const fileShareManager = new FileShareManager(
+      yjsListener,
+      FileSystemManager.getFileSystemManagerInstance()
+    );
+
+    yjsListener.addRemoteFileListener(fileShareManager);
+
+    return new Session(
+      roomName,
+      provider,
+      isOwner,
+      username,
+      peerManager,
+      fileShareManager
+    );
+  }
 }
 
 async function getSessionInfoFromUserInput(): Promise<ConnAuthenticationInfo> {
@@ -51,3 +81,11 @@ async function getSessionInfoFromUserInput(): Promise<ConnAuthenticationInfo> {
 
   return new ConnAuthenticationInfo(username!, roomName!);
 }
+
+export type SessionData = {
+  provider: WebsocketProvider;
+  ydoc: Y.Doc;
+  username: string;
+  roomName: string;
+  isOwner: boolean;
+};

@@ -1,7 +1,7 @@
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
-import { Connection } from "./Connection";
 import { ConnAuthenticationInfo } from "../models/ConnAuthenticationInfo";
+import { SessionData } from "../session/SessionManager";
 
 export class Connector {
   constructor(private websocketServerUrl: string) {
@@ -10,7 +10,7 @@ export class Connector {
   async connect(
     authenticationInfo: ConnAuthenticationInfo,
     isOwner: boolean
-  ): Promise<Connection> {
+  ): Promise<SessionData> {
     console.debug(`Connecting to WebSocket server 
             via ${this.websocketServerUrl} 
             to room ${authenticationInfo.roomName} 
@@ -34,13 +34,13 @@ export class Connector {
     await this.awaitConnection(provider);
     console.debug(`Connected to ${authenticationInfo.roomName}`);
 
-    return new Connection(
+    return {
       provider,
       ydoc,
-      authenticationInfo.username,
-      authenticationInfo.roomName,
-      isOwner
-    );
+      username: authenticationInfo.username,
+      roomName: authenticationInfo.roomName,
+      isOwner,
+    };
   }
   private async awaitConnection(provider: WebsocketProvider): Promise<void> {
     return new Promise<void>((res, _rej) => {

@@ -3,9 +3,8 @@ import { IYFileManagerListener } from "../models/Interfaces";
 import * as Y from "yjs";
 import { PeerConnection } from "../peer/PeerConnection";
 import { Peer } from "../models/Classes";
-import { PeerFileMap } from "../models/Classes";
+import { PeerFileMap, PeerFileFieldKeys } from "../models/Classes";
 import { Editor } from "../editor/Editor";
-import { PeerFileFieldKeys } from "../yjs/yjsUtils";
 
 // RemoteFileListener listens for all YjsListner events
 export class YFileManager extends ObservedBy<IYFileManagerListener> {

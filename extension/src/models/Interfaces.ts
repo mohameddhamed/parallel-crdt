@@ -1,4 +1,5 @@
 import { Editor } from "../editor/Editor";
+import { Session } from "../session/Session";
 import { TextChange } from "./Classes";
 import { Peer } from "./Classes";
 import { Selection } from "./Classes";
@@ -27,4 +28,9 @@ export interface IYFileManagerListener {
     editorChannel: Editor
   ): Promise<void>;
   onRemoteFileDeletedByPeer(fileName: string): void;
+}
+
+export interface ISessionListener {
+  onAddSession(session: Session): void;
+  onRemoveSession(session: Session): void;
 }

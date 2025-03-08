@@ -1,7 +1,8 @@
 import { ObservedBy } from "../ObservedBy";
 import { ConnAuthenticationInfo } from "../models/Classes";
 import { Connector } from "../connection/Connector";
-import { ISessionListener, Session } from "./Session";
+import { Session } from "./Session";
+import { ISessionListener } from "../models/Interfaces";
 import * as vscode from "vscode";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";

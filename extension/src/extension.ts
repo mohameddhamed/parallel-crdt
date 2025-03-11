@@ -39,7 +39,8 @@ export function deactivate() {}
 
 function registerCommands(
   context: vscode.ExtensionContext,
-  facade: Facade
+  facade: Facade,
+  sessionManager: SessionManager
 ): void {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with registerCommand
@@ -67,7 +68,11 @@ function registerCommands(
       );
     })
   );
-  const sidebarProvider = new SidebarProvider(context.extensionUri);
+  const sidebarProvider = new SidebarProvider(
+    context.extensionUri,
+    facade,
+    sessionManager
+  );
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       "parallel-sidebar",
@@ -152,7 +157,7 @@ function init(context: vscode.ExtensionContext): void {
   );
   const treeProvider = new SessionTreeDataProvider(sessionManager);
   sessionManager.registerListener(treeProvider);
-  vscode.window.registerTreeDataProvider("parallel.session", treeProvider);
+  // vscode.window.registerTreeDataProvider("parallel.session", treeProvider);
 
-  registerCommands(context, facade);
+  registerCommands(context, facade, sessionManager);
 }

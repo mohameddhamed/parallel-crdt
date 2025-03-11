@@ -32,8 +32,3 @@ export class Session {
     return this.roomName;
   }
 }
-
-export interface ISessionListener {
-  onAddSession(session: Session): void;
-  onRemoveSession(session: Session): void;
-}

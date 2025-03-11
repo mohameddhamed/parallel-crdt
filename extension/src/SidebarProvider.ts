@@ -3,12 +3,99 @@ import { getNonce } from "./getNonce";
 import { BASEURL } from "./constants";
 import { TokenManager } from "./TokenManager";
 import { authenticate } from "./Authenticate";
+import { Facade } from "./facade";
+import { SessionManager } from "./session/SessionManager";
+import { Session } from "./session/Session";
+import { Peer } from "./models/Classes";
+import { IPeerConnectionListener, ISessionListener } from "./models/Interfaces";
 
-export class SidebarProvider implements vscode.WebviewViewProvider {
+export class SidebarProvider
+  implements
+    vscode.WebviewViewProvider,
+    ISessionListener,
+    IPeerConnectionListener
+{
   _view?: vscode.WebviewView;
   _doc?: vscode.TextDocument;
+  private facade: Facade;
+  private sessionManager: SessionManager;
+  private peers: string[] = [];
 
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  constructor(
+    // private readonly _extensionContext: vscode.ExtensionContext,
+    private readonly _extensionUri: vscode.Uri,
+    facade: Facade,
+    sessionManager: SessionManager
+  ) {
+    this.facade = facade;
+    this.sessionManager = sessionManager;
+    sessionManager.registerListener(this);
+  }
+  private getSessionPeers(sessions: Session[]): string[] {
+    let session = sessions[0];
+    return session.getSessionPeers().map((peer: Peer) => peer.peerName);
+  }
+  // Call this when a session is added
+  // private persistSessionState(roomName: string) {
+  //   this._extensionContext.globalState.update("session", {
+  //     roomName,
+  //     timestamp: Date.now(),
+  //   });
+  // }
+
+  // // Retrieve persisted session state
+  // private getPersistedSessionState() {
+  //   return this._extensionContext.globalState.get<{ roomName: string }>(
+  //     "session"
+  //   );
+  // }
+
+  onAddSession(session: Session): void {
+    console.log("Sidebar Listener session listening");
+    session.getPeerManager().registerListener(this);
+    if (this._view) {
+      console.debug("Sidebar Listener session added", session.getRoomName());
+      TokenManager.setRoom(session.getRoomName());
+      this._view.webview.postMessage({
+        type: "sessionAdded",
+        value: session.getRoomName(),
+      });
+    } else {
+      console.error("Webview is not initialized");
+    }
+  }
+  onPeerAdded(peer: Peer): void {
+    if (this._view) {
+      console.debug("Sidebar Listener peer added", peer.peerName);
+      TokenManager.setPeer(peer.peerName);
+      this._view.webview.postMessage({
+        type: "peerAdded",
+        value: peer.peerName,
+      });
+    } else {
+      console.error("Webview is not initialized");
+    }
+  }
+  onPeerRemoved(peer: Peer): void {
+    if (this._view) {
+      this._view.webview.postMessage({
+        type: "peerRemoved",
+        value: peer.peerName,
+      });
+    } else {
+      console.error("Webview is not initialized");
+    }
+  }
+  onRemoveSession(session: Session): void {
+    if (this._view) {
+      this._view.webview.postMessage({
+        type: "sessionRemoved",
+        value: session.getRoomName(),
+      });
+    } else {
+      console.error("Webview is not initialized");
+    }
+  }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView;
@@ -32,8 +119,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           authenticate(() => {
             console.log("received get-token request");
             webviewView.webview.postMessage({
-              type : 'token',
-              value : TokenManager.getToken(), 
+              type: "token",
+              value: TokenManager.getToken(),
             });
           });
           break;
@@ -42,14 +129,37 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.value) {
             return;
           }
-          vscode.window.showInformationMessage(data.value);
+          // vscode.window.showInformationMessage(data.value);
+          await this.facade.joinSession().catch(async (err) => {
+            console.log("Error joining session", err);
+            vscode.window.showErrorMessage("Error joining session");
+            await vscode.window.showErrorMessage(err);
+          });
           break;
         }
-        case 'get-token' : {
+        case "get-peer": {
+          console.log("received get-peer request");
+          console.log("posting peerName request", TokenManager.getPeer());
+          webviewView.webview.postMessage({
+            type: "peerName",
+            value: TokenManager.getPeer(),
+          });
+          break;
+        }
+        case "get-room": {
+          console.log("received get-room request");
+          console.log("posting roomName request", TokenManager.getRoom());
+          webviewView.webview.postMessage({
+            type: "roomName",
+            value: TokenManager.getRoom(),
+          });
+          break;
+        }
+        case "get-token": {
           console.log("received get-token request");
           webviewView.webview.postMessage({
-            type : 'token',
-            value : TokenManager.getToken(), 
+            type: "token",
+            value: TokenManager.getToken(),
           });
           break;
         }
@@ -57,8 +167,12 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
           if (!data.value) {
             return;
           }
-          vscode.window.showErrorMessage(data.value);
-          break;
+          // vscode.window.showErrorMessage(data.value);
+          await this.facade.startSession().catch(async (err) => {
+            console.log("Error starting session", err);
+            vscode.window.showErrorMessage("Error starting session");
+            await vscode.window.showErrorMessage(err);
+          });
         }
       }
     });
@@ -94,8 +208,8 @@ export class SidebarProvider implements vscode.WebviewViewProvider {
 					and only allow scripts that have a specific nonce.
         -->
         <meta http-equiv="Content-Security-Policy" content=" img-src https: data:; style-src 'unsafe-inline' ${
-      webview.cspSource
-    }; script-src 'nonce-${nonce}';">
+          webview.cspSource
+        }; script-src 'nonce-${nonce}';">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<link href="${styleResetUri}" rel="stylesheet">
 				<link href="${styleVSCodeUri}" rel="stylesheet">

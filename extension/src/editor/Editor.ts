@@ -1,7 +1,7 @@
 import { get } from "http";
 import { ObservedBy } from "../ObservedBy";
 import { Document } from "../document/Document";
-import { PeerFileMap } from "../models/Classes";
+import { IPeerFile, PeerFileMap } from "../models/Classes";
 import { PeerSelection, Selection } from "../models/Classes";
 import { IEditorListener } from "../models/Interfaces";
 import * as Y from "yjs";
@@ -12,7 +12,7 @@ export class Editor extends ObservedBy<IEditorListener> {
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
-    public yjsFile: PeerFileMap
+    public yjsFile: IPeerFile
   ) {
     super();
     const peerSelectionEventListener = (

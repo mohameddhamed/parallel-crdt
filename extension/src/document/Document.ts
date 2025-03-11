@@ -1,5 +1,5 @@
 import { ObservedBy } from "../ObservedBy";
-import { TextChange, TextChangeType } from "../models/Classes";
+import { IPeerFile, TextChange, TextChangeType } from "../models/Classes";
 import { getIndexFromPosition, getPositionFromIndex } from "../models/Utils";
 import { PeerFileMap } from "../models/Classes";
 import { IDocumentListener as IDocumentListener } from "../models/Interfaces";
@@ -13,7 +13,7 @@ export class Document extends ObservedBy<IDocumentListener> {
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
-    public yjsFile: PeerFileMap
+    public yjsFile: IPeerFile
   ) {
     super();
     this.setupDocumentListeners();

@@ -22,24 +22,13 @@
       ]
     },
     "views": {
-      "explorer": [
+      "parallel-sidebar-view": [
         {
-          "id": "parallel.session",
-          "name": "Parallel"
-        }
-      ]
-    },
-    "menus": {
-      "view/item/context": [
-        {
-          "command": "parallel-code.JoinSession",
-          "when": "view == parallel.session && viewItem == sessions",
-          "group": "inline"
-        },
-        {
-          "command": "parallel-code.NewSession",
-          "when": "view == parallel.session && viewItem == sessions",
-          "group": "inline"
+          "type": "webview",
+          "id": "parallel-sidebar",
+          "name": "Parallel",
+          "icon": "media/server.svg",
+          "contextualTitle": "Parallel"
         }
       ]
     },

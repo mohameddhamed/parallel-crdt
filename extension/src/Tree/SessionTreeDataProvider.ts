@@ -5,10 +5,13 @@ import {
   SessionTreeNode,
   TreeNode,
 } from "./TreeNode";
-import { ISessionListener, Session } from "../session/Session";
-import { IPeerConnectionListener } from "../models/IPeerConnectionListener";
+import { Session } from "../session/Session";
+import {
+  ISessionListener,
+  IPeerConnectionListener,
+} from "../models/Interfaces";
 import { SessionManager } from "../session/SessionManager";
-import { Peer } from "../models/Peer";
+import { Peer } from "../models/Classes";
 type EmittedEventType = void | TreeNode | TreeNode[] | null | undefined;
 
 export class SessionTreeDataProvider

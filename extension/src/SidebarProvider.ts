@@ -35,20 +35,6 @@ export class SidebarProvider
     let session = sessions[0];
     return session.getSessionPeers().map((peer: Peer) => peer.peerName);
   }
-  // Call this when a session is added
-  // private persistSessionState(roomName: string) {
-  //   this._extensionContext.globalState.update("session", {
-  //     roomName,
-  //     timestamp: Date.now(),
-  //   });
-  // }
-
-  // // Retrieve persisted session state
-  // private getPersistedSessionState() {
-  //   return this._extensionContext.globalState.get<{ roomName: string }>(
-  //     "session"
-  //   );
-  // }
 
   onAddSession(session: Session): void {
     console.log("Sidebar Listener session listening");
@@ -56,9 +42,14 @@ export class SidebarProvider
     if (this._view) {
       console.debug("Sidebar Listener session added", session.getRoomName());
       TokenManager.setRoom(session.getRoomName());
+      TokenManager.setUserName(session.getUserName());
       this._view.webview.postMessage({
         type: "sessionAdded",
         value: session.getRoomName(),
+      });
+      this._view.webview.postMessage({
+        type: "sessionAdded2",
+        value: session.getUserName(),
       });
     } else {
       console.error("Webview is not initialized");
@@ -143,6 +134,15 @@ export class SidebarProvider
           webviewView.webview.postMessage({
             type: "peerName",
             value: TokenManager.getPeer(),
+          });
+          break;
+        }
+        case "get-userName": {
+          console.log("received get-userName request");
+          console.log("posting userName request", TokenManager.getUserName());
+          webviewView.webview.postMessage({
+            type: "userName",
+            value: TokenManager.getUserName(),
           });
           break;
         }

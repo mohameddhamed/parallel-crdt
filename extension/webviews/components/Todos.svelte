@@ -8,6 +8,7 @@
   export let accessToken: string;
   export let roomName: string;
   export let peerName: string;
+  export let userName: string;
 
   const addTodo = async (t: string) => {
     text = t;
@@ -38,6 +39,7 @@
     tsvscode.postMessage({ type: "get-token", value: undefined });
     tsvscode.postMessage({ type: "get-room", value: undefined });
     tsvscode.postMessage({ type: "get-peer", value: undefined });
+    tsvscode.postMessage({ type: "get-userName", value: undefined });
 
     const response = await fetch(`${apiBaseUrl}todo`, {
       headers: {
@@ -52,7 +54,8 @@
 <div>
   Hello {user.name}
   in room {roomName}
-  with {peerName}
+  with peer {peerName}
+  and user {userName}
 </div>
 <form
   on:submit|preventDefault={async () => {

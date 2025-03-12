@@ -15,6 +15,12 @@ export class TokenManager {
   static setPeer(peerName: string) {
     this.globalState.update("peer", peerName);
   }
+  static getUserName(): string | undefined {
+    return this.globalState.get("userName");
+  }
+  static setUserName(userName: string) {
+    this.globalState.update("userName", userName);
+  }
   static getRoom(): string | undefined {
     return this.globalState.get("room");
   }

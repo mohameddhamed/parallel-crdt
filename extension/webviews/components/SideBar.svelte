@@ -3,8 +3,9 @@
   import Todos from "./Todos.svelte";
   import type { User } from "../types";
 
-  let roomName = tsvscode.getState()?.roomName || "";
-  let peerName = tsvscode.getState()?.peerName || "";
+  let roomName = "";
+  let peerName = "";
+  let userName = "";
   let accessToken = "";
   let user: User | null = null;
   let loading = true;
@@ -39,6 +40,10 @@
           console.log("Sidebar roomName", message.value);
           roomName = message.value;
           break;
+        case "sessionAdded2":
+          console.log("Sidebar session added 2", message.value);
+          userName = message.value;
+          break;
         case "sessionAdded":
           console.log("Sidebar session added", message.value);
           roomName = message.value;
@@ -52,6 +57,7 @@
     tsvscode.postMessage({ type: "get-token", value: undefined });
     tsvscode.postMessage({ type: "get-room", value: undefined });
     tsvscode.postMessage({ type: "get-peer", value: undefined });
+    tsvscode.postMessage({ type: "get-userName", value: undefined });
   });
 </script>
 
@@ -61,7 +67,7 @@
 {:else if user}
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <Todos {user} {accessToken} {roomName} {peerName} />
+    <Todos {user} {accessToken} {roomName} {peerName} {userName} />
     <button
       on:click={() => {
         tsvscode.postMessage({ type: "onInfo", value: "Posting Info" });

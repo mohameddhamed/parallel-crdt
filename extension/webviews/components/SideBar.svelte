@@ -6,6 +6,7 @@
   let roomName = "";
   let peerName = "";
   let userName = "";
+  let peerNames: string[] = [];
   let accessToken = "";
   let user: User | null = null;
   let loading = true;
@@ -35,10 +36,15 @@
         case "peerName":
           console.log("Sidebar peerName", message.value);
           peerName = message.value;
+          // peerNames = [...peerNames, message.value];
           break;
         case "roomName":
           console.log("Sidebar roomName", message.value);
           roomName = message.value;
+          break;
+        case "userName":
+          console.log("Sidebar userName", message.value);
+          userName = message.value;
           break;
         case "sessionAdded2":
           console.log("Sidebar session added 2", message.value);
@@ -51,6 +57,7 @@
         case "peerAdded":
           console.log("Sidebar peer added", message.value);
           peerName = message.value;
+          peerNames = [...peerNames, message.value];
           break;
       }
     });
@@ -68,6 +75,13 @@
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
     <Todos {user} {accessToken} {roomName} {peerName} {userName} />
+    <ul>
+      {#each peerNames as peerName (peerName)}
+        <li>
+          {peerName}
+        </li>
+      {/each}
+    </ul>
     <button
       on:click={() => {
         tsvscode.postMessage({ type: "onInfo", value: "Posting Info" });

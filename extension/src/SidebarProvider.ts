@@ -8,6 +8,7 @@ import { SessionManager } from "./session/SessionManager";
 import { Session } from "./session/Session";
 import { Peer } from "./models/Classes";
 import { IPeerConnectionListener, ISessionListener } from "./models/Interfaces";
+import { TokenExpiredError } from "jsonwebtoken";
 
 export class SidebarProvider
   implements
@@ -40,7 +41,11 @@ export class SidebarProvider
       TokenManager.setRoom(session.getRoomName());
       TokenManager.setUserName(session.getUserName());
       TokenManager.setIsOwner(session.isOwner);
-      // TokenManager.setIsOwner(session.isOwner);
+      TokenManager.setPeers(
+        session.getSessionPeers().map((peer) => peer.peerName)
+      );
+
+      console.debug("the peers are", TokenManager.getPeers());
 
       this._view.webview.postMessage({
         type: "sessionAdded",
@@ -51,6 +56,7 @@ export class SidebarProvider
         value: {
           isOwner: TokenManager.getIsOwner(),
           userName: TokenManager.getUserName(),
+          peerNames: TokenManager.getPeers(),
         },
       });
     } else {
@@ -61,6 +67,8 @@ export class SidebarProvider
     if (this._view) {
       console.debug("Sidebar Listener peer added", peer.peerName);
       TokenManager.setPeer(peer.peerName);
+      let peers = TokenManager.getPeers() || [];
+      TokenManager.setPeers([...peers, peer.peerName]);
       this._view.webview.postMessage({
         type: "peerAdded",
         value: peer.peerName,
@@ -141,12 +149,16 @@ export class SidebarProvider
         }
         case "get-userName": {
           console.log("received get-userName request");
-          console.log("posting userName request", TokenManager.getUserName());
+          console.log(
+            "posting userName request peers",
+            TokenManager.getPeers()
+          );
           webviewView.webview.postMessage({
             type: "userName",
             value: {
               userName: TokenManager.getUserName(),
               isOwner: TokenManager.getIsOwner(),
+              peerNames: TokenManager.getPeers(),
             },
           });
           break;

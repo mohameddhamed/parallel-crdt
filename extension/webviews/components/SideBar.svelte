@@ -47,12 +47,13 @@
           console.log("Sidebar userName", message.value);
           userName = message.value.userName;
           isOwner = message.value.isOwner;
+          peerNames = message.value.peerNames;
           break;
         case "sessionAdded2":
           console.log("Sidebar session added 2", message.value);
           userName = message.value.userName;
           isOwner = message.value.isOwner;
-          // peerNames = message.value.peers || [];
+          peerNames = message.value.peerNames;
           break;
         case "sessionAdded":
           console.log("Sidebar session added", message.value);
@@ -80,9 +81,9 @@
     <pre>{JSON.stringify(user, null, 2)}</pre>
     <Todos {user} {accessToken} {roomName} {peerName} {userName} {isOwner} />
     <ul>
-      {#each peerNames as peerName (peerName)}
+      {#each peerNames as peer (peer)}
         <li>
-          {peerName}
+          {peer}
         </li>
       {/each}
     </ul>

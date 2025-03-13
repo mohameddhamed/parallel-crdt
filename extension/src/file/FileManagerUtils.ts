@@ -35,6 +35,10 @@ export class FileManagerUtils {
   public addFileLocally(fileName: string): vscode.Uri | null {
     const fullPathToFile = path.join(this.workspaceFolderPath, fileName);
     if (!createEmptyFile(fullPathToFile)) {
+      console.log(
+        "Create Empty File error: File already exists: ",
+        fullPathToFile
+      );
       return null;
     }
     return vscode.Uri.file(fullPathToFile);

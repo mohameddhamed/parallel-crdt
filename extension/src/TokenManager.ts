@@ -9,6 +9,12 @@ export class TokenManager {
   static setToken(token: string) {
     this.globalState.update(KEY, token);
   }
+  static getPeers(): string[] | undefined {
+    return this.globalState.get("peers");
+  }
+  static setPeers(peerNames: string[]) {
+    this.globalState.update("peers", peerNames);
+  }
   static getPeer(): string | undefined {
     return this.globalState.get("peer");
   }
@@ -26,5 +32,11 @@ export class TokenManager {
   }
   static setRoom(roomName: string) {
     this.globalState.update("room", roomName);
+  }
+  static getIsOwner(): boolean | undefined {
+    return this.globalState.get("owner");
+  }
+  static setIsOwner(isOwner: boolean) {
+    this.globalState.update("owner", isOwner);
   }
 }

@@ -6,6 +6,7 @@
   let roomName = "";
   let peerName = "";
   let userName = "";
+  let isOwner = false;
   let peerNames: string[] = [];
   let accessToken = "";
   let user: User | null = null;
@@ -44,11 +45,14 @@
           break;
         case "userName":
           console.log("Sidebar userName", message.value);
-          userName = message.value;
+          userName = message.value.userName;
+          isOwner = message.value.isOwner;
           break;
         case "sessionAdded2":
           console.log("Sidebar session added 2", message.value);
-          userName = message.value;
+          userName = message.value.userName;
+          isOwner = message.value.isOwner;
+          // peerNames = message.value.peers || [];
           break;
         case "sessionAdded":
           console.log("Sidebar session added", message.value);
@@ -74,7 +78,7 @@
 {:else if user}
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <Todos {user} {accessToken} {roomName} {peerName} {userName} />
+    <Todos {user} {accessToken} {roomName} {peerName} {userName} {isOwner} />
     <ul>
       {#each peerNames as peerName (peerName)}
         <li>

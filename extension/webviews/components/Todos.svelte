@@ -9,6 +9,7 @@
   export let roomName: string;
   export let peerName: string;
   export let userName: string;
+  export let isOwner: boolean;
 
   const addTodo = async (t: string) => {
     text = t;
@@ -52,8 +53,7 @@
 </script>
 
 <div>
-  Hello {user.name}
-  in room {roomName}
+  Hello {user.name} ({isOwner ? "Owner" : "Guest"}) in room {roomName}
   with peer {peerName}
   and user {userName}
 </div>

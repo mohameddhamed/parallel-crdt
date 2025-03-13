@@ -31,10 +31,6 @@ export class SidebarProvider
     this.sessionManager = sessionManager;
     sessionManager.registerListener(this);
   }
-  private getSessionPeers(sessions: Session[]): string[] {
-    let session = sessions[0];
-    return session.getSessionPeers().map((peer: Peer) => peer.peerName);
-  }
 
   onAddSession(session: Session): void {
     console.log("Sidebar Listener session listening");
@@ -43,13 +39,19 @@ export class SidebarProvider
       console.debug("Sidebar Listener session added", session.getRoomName());
       TokenManager.setRoom(session.getRoomName());
       TokenManager.setUserName(session.getUserName());
+      TokenManager.setIsOwner(session.isOwner);
+      // TokenManager.setIsOwner(session.isOwner);
+
       this._view.webview.postMessage({
         type: "sessionAdded",
         value: session.getRoomName(),
       });
       this._view.webview.postMessage({
         type: "sessionAdded2",
-        value: session.getUserName(),
+        value: {
+          isOwner: TokenManager.getIsOwner(),
+          userName: TokenManager.getUserName(),
+        },
       });
     } else {
       console.error("Webview is not initialized");
@@ -142,7 +144,10 @@ export class SidebarProvider
           console.log("posting userName request", TokenManager.getUserName());
           webviewView.webview.postMessage({
             type: "userName",
-            value: TokenManager.getUserName(),
+            value: {
+              userName: TokenManager.getUserName(),
+              isOwner: TokenManager.getIsOwner(),
+            },
           });
           break;
         }

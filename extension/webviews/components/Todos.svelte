@@ -7,7 +7,6 @@
   export let user: User;
   export let accessToken: string;
   export let roomName: string;
-  export let peerName: string;
   export let userName: string;
   export let isOwner: boolean;
 
@@ -33,13 +32,10 @@
       console.log(message);
       switch (message.type) {
         case "new-todo":
-          // todos = [{text: message.value, completed: false}, ...todos]
           addTodo(message.value);
       }
     });
     tsvscode.postMessage({ type: "get-token", value: undefined });
-    tsvscode.postMessage({ type: "get-room", value: undefined });
-    tsvscode.postMessage({ type: "get-peer", value: undefined });
     tsvscode.postMessage({ type: "get-userName", value: undefined });
 
     const response = await fetch(`${apiBaseUrl}todo`, {
@@ -54,7 +50,6 @@
 
 <div>
   Hello {user.name} ({isOwner ? "Owner" : "Guest"}) in room {roomName}
-  with peer {peerName}
   and user {userName}
 </div>
 <form
@@ -65,30 +60,6 @@
 >
   <input bind:value={text} />
 </form>
-<ul>
-  {#each todos as todo (todo.id)}
-    <!-- svelte-ignore a11y-click-events-have-key-events -->
-    <li
-      class:complete={todo.completed}
-      on:click={async () => {
-        todo.completed = !todo.completed;
-        const response = await fetch(`${apiBaseUrl}todo`, {
-          method: "PUT",
-          body: JSON.stringify({
-            id: todo.id,
-          }),
-          headers: {
-            "content-type": "application/json",
-            authorization: `Bearer ${accessToken}`,
-          },
-        });
-        // const {todo} = await response.json();
-      }}
-    >
-      {todo.text}
-    </li>
-  {/each}
-</ul>
 
 <style>
   h1 {

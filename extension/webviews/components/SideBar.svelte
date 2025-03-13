@@ -34,30 +34,19 @@
           user = data.user;
           loading = false;
           break;
-        case "peerName":
-          console.log("Sidebar peerName", message.value);
-          peerName = message.value;
-          // peerNames = [...peerNames, message.value];
-          break;
-        case "roomName":
-          console.log("Sidebar roomName", message.value);
-          roomName = message.value;
-          break;
         case "userName":
           console.log("Sidebar userName", message.value);
           userName = message.value.userName;
           isOwner = message.value.isOwner;
           peerNames = message.value.peerNames;
+          roomName = message.value.roomName;
           break;
         case "sessionAdded2":
           console.log("Sidebar session added 2", message.value);
           userName = message.value.userName;
           isOwner = message.value.isOwner;
           peerNames = message.value.peerNames;
-          break;
-        case "sessionAdded":
-          console.log("Sidebar session added", message.value);
-          roomName = message.value;
+          roomName = message.value.roomName;
           break;
         case "peerAdded":
           console.log("Sidebar peer added", message.value);
@@ -67,8 +56,6 @@
       }
     });
     tsvscode.postMessage({ type: "get-token", value: undefined });
-    tsvscode.postMessage({ type: "get-room", value: undefined });
-    tsvscode.postMessage({ type: "get-peer", value: undefined });
     tsvscode.postMessage({ type: "get-userName", value: undefined });
   });
 </script>
@@ -79,7 +66,7 @@
 {:else if user}
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <Todos {user} {accessToken} {roomName} {peerName} {userName} {isOwner} />
+    <Todos {user} {accessToken} {roomName} {userName} {isOwner} />
     <ul>
       {#each peerNames as peer (peer)}
         <li>

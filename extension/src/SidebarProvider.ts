@@ -23,7 +23,6 @@ export class SidebarProvider
   private peers: string[] = [];
 
   constructor(
-    // private readonly _extensionContext: vscode.ExtensionContext,
     private readonly _extensionUri: vscode.Uri,
     facade: Facade,
     sessionManager: SessionManager
@@ -45,17 +44,12 @@ export class SidebarProvider
         session.getSessionPeers().map((peer) => peer.peerName)
       );
 
-      console.debug("the peers are", TokenManager.getPeers());
-
-      this._view.webview.postMessage({
-        type: "sessionAdded",
-        value: session.getRoomName(),
-      });
       this._view.webview.postMessage({
         type: "sessionAdded2",
         value: {
           isOwner: TokenManager.getIsOwner(),
           userName: TokenManager.getUserName(),
+          roomName: TokenManager.getRoom(),
           peerNames: TokenManager.getPeers(),
         },
       });
@@ -138,15 +132,6 @@ export class SidebarProvider
           });
           break;
         }
-        case "get-peer": {
-          console.log("received get-peer request");
-          console.log("posting peerName request", TokenManager.getPeer());
-          webviewView.webview.postMessage({
-            type: "peerName",
-            value: TokenManager.getPeer(),
-          });
-          break;
-        }
         case "get-userName": {
           console.log("received get-userName request");
           console.log(
@@ -158,17 +143,9 @@ export class SidebarProvider
             value: {
               userName: TokenManager.getUserName(),
               isOwner: TokenManager.getIsOwner(),
+              roomName: TokenManager.getRoom(),
               peerNames: TokenManager.getPeers(),
             },
-          });
-          break;
-        }
-        case "get-room": {
-          console.log("received get-room request");
-          console.log("posting roomName request", TokenManager.getRoom());
-          webviewView.webview.postMessage({
-            type: "roomName",
-            value: TokenManager.getRoom(),
           });
           break;
         }

@@ -17,8 +17,14 @@ export class SessionManager extends ObservedBy<ISessionListener> {
     super();
   }
 
-  async startNewSession(isOwner: boolean = false): Promise<Session> {
-    const authenticationInfo = await getSessionInfoFromUserInput();
+  async logIntoSession(
+    isOwner: boolean = false,
+    authenticationInfo: ConnAuthenticationInfo | null = null
+  ): Promise<Session> {
+    if (authenticationInfo === null) {
+      authenticationInfo = await getSessionInfoFromUserInput();
+    }
+    // const authenticationInfo = await getSessionInfoFromUserInput();
     const sessionData = await this.connector.connect(
       authenticationInfo,
       isOwner

@@ -120,6 +120,30 @@ export class SidebarProvider
           });
           break;
         }
+        case "start-session": {
+          if (!data.value) {
+            return;
+          }
+          // vscode.window.showInformationMessage(data.value);
+          let user = data.value.user;
+          let room = data.value.room;
+          let isOwner = data.value.isOwner;
+          console.log("received start-session request", user, room, isOwner);
+          if (isOwner === true) {
+            await this.facade.startSession(user, room).catch(async (err) => {
+              console.log("Error starting session", err);
+              vscode.window.showErrorMessage("Error starting session");
+              await vscode.window.showErrorMessage(err);
+            });
+          } else {
+            await this.facade.joinSession(user, room).catch(async (err) => {
+              console.log("Error joining session", err);
+              vscode.window.showErrorMessage("Error joining session");
+              await vscode.window.showErrorMessage(err);
+            });
+          }
+          break;
+        }
         case "onInfo": {
           if (!data.value) {
             return;

@@ -2,7 +2,8 @@
   import { onMount } from "svelte";
   import type { User } from "../types";
 
-  let text = "";
+  let addSessionUser = "";
+  let addSessionRoom = "";
   let todos: Array<{ text: string; completed: boolean; id: number }> = [];
   export let user: User;
   export let accessToken: string;
@@ -10,41 +11,32 @@
   export let userName: string;
   export let isOwner: boolean;
 
-  const addTodo = async (t: string) => {
-    text = t;
-    const response = await fetch(`${apiBaseUrl}todo`, {
-      method: "POST",
-      body: JSON.stringify({
-        text,
-      }),
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${accessToken}`,
-      },
+  const addSession = async (user: string, room: string, isOwner = false) => {
+    tsvscode.postMessage({
+      type: "start-session",
+      value: { user, room, isOwner },
     });
-    const { todo } = await response.json();
-    todos = [todo, ...todos];
   };
 
   onMount(async () => {
-    window.addEventListener("message", async (e) => {
-      let message = e.data;
-      console.log(message);
-      switch (message.type) {
-        case "new-todo":
-          addTodo(message.value);
-      }
-    });
+    // window.addEventListener("message", async (e) => {
+    //   let message = e.data;
+    //   console.log(message);
+    //   switch (message.type) {
+    //     case "new-todo":
+    //       addSession(message.value);
+    //   }
+    // });
     tsvscode.postMessage({ type: "get-token", value: undefined });
     tsvscode.postMessage({ type: "get-userName", value: undefined });
 
-    const response = await fetch(`${apiBaseUrl}todo`, {
-      headers: {
-        authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const payload = await response.json();
-    todos = payload.todos;
+    // const response = await fetch(`${apiBaseUrl}todo`, {
+    //   headers: {
+    //     authorization: `Bearer ${accessToken}`,
+    //   },
+    // });
+    // const payload = await response.json();
+    // todos = payload.todos;
   });
 </script>
 
@@ -54,11 +46,35 @@
 </div>
 <form
   on:submit|preventDefault={async () => {
-    addTodo(text);
-    text = "";
+    addSession(addSessionUser, addSessionRoom);
+    addSessionUser = "";
+    addSessionRoom = "";
   }}
 >
-  <input bind:value={text} />
+  <input bind:value={addSessionUser} placeholder="Username" />
+  <input bind:value={addSessionRoom} placeholder="Room Name" />
+  <div class="button-container">
+    <button
+      type="button"
+      on:click={async () => {
+        await addSession(addSessionUser, addSessionRoom);
+        addSessionUser = "";
+        addSessionRoom = "";
+      }}
+    >
+      Join Session
+    </button>
+    <button
+      type="button"
+      on:click={async () => {
+        await addSession(addSessionUser, addSessionRoom, true);
+        addSessionUser = "";
+        addSessionRoom = "";
+      }}
+    >
+      Start Session
+    </button>
+  </div>
 </form>
 
 <style>
@@ -69,5 +85,9 @@
   .complete {
     background-color: green;
     color: white;
+  }
+  .button-container {
+    display: flex;
+    gap: 10px; /* Adjust the gap between buttons as needed */
   }
 </style>

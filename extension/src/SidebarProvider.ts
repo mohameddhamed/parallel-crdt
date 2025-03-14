@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { getNonce } from "./getNonce";
 import { BASEURL } from "./constants";
-import { TokenManager } from "./TokenManager";
+import { StateManager } from "./StateManager";
 import { authenticate } from "./Authenticate";
 import { Facade } from "./facade";
 import { SessionManager } from "./session/SessionManager";
@@ -37,20 +37,20 @@ export class SidebarProvider
     session.getPeerManager().registerListener(this);
     if (this._view) {
       console.debug("Sidebar Listener session added", session.getRoomName());
-      TokenManager.setRoom(session.getRoomName());
-      TokenManager.setUserName(session.getUserName());
-      TokenManager.setIsOwner(session.isOwner);
-      TokenManager.setPeers(
+      StateManager.setRoom(session.getRoomName());
+      StateManager.setUserName(session.getUserName());
+      StateManager.setIsOwner(session.isOwner);
+      StateManager.setPeers(
         session.getSessionPeers().map((peer) => peer.peerName)
       );
 
       this._view.webview.postMessage({
         type: "sessionAdded2",
         value: {
-          isOwner: TokenManager.getIsOwner(),
-          userName: TokenManager.getUserName(),
-          roomName: TokenManager.getRoom(),
-          peerNames: TokenManager.getPeers(),
+          isOwner: StateManager.getIsOwner(),
+          userName: StateManager.getUserName(),
+          roomName: StateManager.getRoom(),
+          peerNames: StateManager.getPeers(),
         },
       });
     } else {
@@ -60,9 +60,9 @@ export class SidebarProvider
   onPeerAdded(peer: Peer): void {
     if (this._view) {
       console.debug("Sidebar Listener peer added", peer.peerName);
-      TokenManager.setPeer(peer.peerName);
-      let peers = TokenManager.getPeers() || [];
-      TokenManager.setPeers([...peers, peer.peerName]);
+      StateManager.setPeer(peer.peerName);
+      let peers = StateManager.getPeers() || [];
+      StateManager.setPeers([...peers, peer.peerName]);
       this._view.webview.postMessage({
         type: "peerAdded",
         value: peer.peerName,
@@ -107,7 +107,7 @@ export class SidebarProvider
     webviewView.webview.onDidReceiveMessage(async (data) => {
       switch (data.type) {
         case "logout": {
-          TokenManager.setToken("");
+          StateManager.setToken("");
           break;
         }
         case "authenticate": {
@@ -115,7 +115,7 @@ export class SidebarProvider
             console.log("received get-token request");
             webviewView.webview.postMessage({
               type: "token",
-              value: TokenManager.getToken(),
+              value: StateManager.getToken(),
             });
           });
           break;
@@ -136,15 +136,15 @@ export class SidebarProvider
           console.log("received get-userName request");
           console.log(
             "posting userName request peers",
-            TokenManager.getPeers()
+            StateManager.getPeers()
           );
           webviewView.webview.postMessage({
             type: "userName",
             value: {
-              userName: TokenManager.getUserName(),
-              isOwner: TokenManager.getIsOwner(),
-              roomName: TokenManager.getRoom(),
-              peerNames: TokenManager.getPeers(),
+              userName: StateManager.getUserName(),
+              isOwner: StateManager.getIsOwner(),
+              roomName: StateManager.getRoom(),
+              peerNames: StateManager.getPeers(),
             },
           });
           break;
@@ -153,7 +153,7 @@ export class SidebarProvider
           console.log("received get-token request");
           webviewView.webview.postMessage({
             type: "token",
-            value: TokenManager.getToken(),
+            value: StateManager.getToken(),
           });
           break;
         }

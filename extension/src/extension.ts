@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { HelloWorldPanel } from "./HelloWorldPanel";
 import { SidebarProvider } from "./SidebarProvider";
 import { authenticate } from "./Authenticate";
-import { TokenManager } from "./TokenManager";
+import { StateManager } from "./StateManager";
 import { initGlobal } from "./utils";
 import { Config } from "./Config";
 import { SessionManager } from "./session/SessionManager";
@@ -16,8 +16,8 @@ import { Connector } from "./connection/Connector";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-  TokenManager.globalState = context.globalState;
-  console.log("The token is ", TokenManager.getToken());
+  StateManager.globalState = context.globalState;
+  console.log("The token is ", StateManager.getToken());
 
   const item = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right

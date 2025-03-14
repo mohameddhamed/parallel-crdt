@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import Todos from "./Todos.svelte";
+  import UserDetails from "./UserDetails.svelte";
   import type { User } from "../types";
 
   let roomName = "";
@@ -66,7 +66,7 @@
 {:else if user}
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <Todos {user} {accessToken} {roomName} {userName} {isOwner} />
+    <UserDetails {user} {accessToken} {roomName} {userName} {isOwner} />
     <ul>
       {#each peerNames as peer (peer)}
         <li>

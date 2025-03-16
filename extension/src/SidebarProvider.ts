@@ -121,6 +121,17 @@ export class SidebarProvider
           });
           break;
         }
+        case "end-session": {
+          console.log("received end-session request 0");
+          // vscode.window.showInformationMessage(data.value);
+          console.log("received end-session request 1");
+          await this.facade.endSession().catch(async (err) => {
+            console.log("Error ending session", err);
+            vscode.window.showErrorMessage("Error ending session");
+            await vscode.window.showErrorMessage(err);
+          });
+          break;
+        }
         case "start-session": {
           if (!data.value) {
             return;

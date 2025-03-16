@@ -9,6 +9,10 @@
   export let userName: string;
   export let isOwner: boolean;
 
+  const endSession = async () => {
+    console.log("End Session post message in UserDetails");
+    tsvscode.postMessage({ type: "end-session", value: undefined });
+  };
   const addSession = async (user: string, room: string, isOwner = false) => {
     tsvscode.postMessage({
       type: "start-session",
@@ -17,24 +21,8 @@
   };
 
   onMount(async () => {
-    // window.addEventListener("message", async (e) => {
-    //   let message = e.data;
-    //   console.log(message);
-    //   switch (message.type) {
-    //     case "new-todo":
-    //       addSession(message.value);
-    //   }
-    // });
     tsvscode.postMessage({ type: "get-token", value: undefined });
     tsvscode.postMessage({ type: "get-userName", value: undefined });
-
-    // const response = await fetch(`${apiBaseUrl}todo`, {
-    //   headers: {
-    //     authorization: `Bearer ${accessToken}`,
-    //   },
-    // });
-    // const payload = await response.json();
-    // todos = payload.todos;
   });
 </script>
 
@@ -73,6 +61,15 @@
       Start Session
     </button>
   </div>
+  <button
+    type="button"
+    on:click={async () => {
+      console.log("End Session clicked in UserDetails");
+      await endSession();
+    }}
+  >
+    End Session
+  </button>
 </form>
 
 <style>

@@ -31,6 +31,12 @@ export class Facade {
     await session.fileShareManager.shareLocalFilesToPeers(workspaceFolderPath);
   }
 
+  // TODO: session array to session instance
+  async endSession(): Promise<void> {
+    let session = this.sessionManager.getSessions()[0];
+    await this.sessionManager.endSession(session);
+  }
+
   async joinSession(
     username: string | null = null,
     room: string | null = null

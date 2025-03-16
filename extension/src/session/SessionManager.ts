@@ -43,6 +43,39 @@ export class SessionManager extends ObservedBy<ISessionListener> {
       "Listeners notified"
     );
   }
+  removeSession(session: Session): void {
+    this.sessions.pop();
+    this.notifyListeners(async (listener) => listener.onRemoveSession(session));
+    console.debug(
+      "SessionManager: addSession: session: ",
+      session,
+      "Listeners notified"
+    );
+  }
+  // Example usage in SessionManager or similar class
+  async endSession(session: Session): Promise<void> {
+    try {
+      // Extract the sessionData from your session object
+      // const sessionData: SessionData = {
+      //   provider: session.getProvider(),
+      //   ydoc: session.getYDoc(),
+      //   username: session.getUserName(),
+      //   roomName: session.getRoomName(),
+      //   isOwner: session.isOwner(),
+      // };
+
+      // Disconnect from the session
+      await this.connector.disconnect(session);
+
+      // Remove the session from your session list
+      this.removeSession(session);
+
+      console.debug(`Session ${session.getRoomName()} ended successfully`);
+    } catch (error) {
+      console.error(`Error ending session: ${error}`);
+      throw error;
+    }
+  }
 
   getSessions(): Session[] {
     // Shallow copy | Encapsulation
@@ -55,22 +88,22 @@ export class SessionManager extends ObservedBy<ISessionListener> {
     roomName,
     isOwner,
   }: SessionData): Session {
-    const peerManager = new PeerConnection();
-    const yFileManager = new YFileManager(ydoc, username, peerManager);
-    const fileShareManager = new FileManager(
+    const peerConnection = new PeerConnection();
+    const yFileManager = new YFileManager(ydoc, username, peerConnection);
+    const fileManager = new FileManager(
       yFileManager,
       FileManagerUtils.getFileShareManagerUtilsInstance()
     );
 
-    yFileManager.addYFileManagerListener(fileShareManager);
+    yFileManager.addYFileManagerListener(fileManager);
 
     return new Session(
       roomName,
       provider,
       isOwner,
       username,
-      peerManager,
-      fileShareManager
+      peerConnection,
+      fileManager
     );
   }
 }

@@ -2,6 +2,7 @@ import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 import { ConnAuthenticationInfo } from "../models/Classes";
 import { SessionData } from "../session/SessionManager";
+import { Session } from "../session/Session";
 
 export class Connector {
   constructor(private websocketServerUrl: string) {
@@ -42,6 +43,49 @@ export class Connector {
       isOwner,
     };
   }
+
+  /**
+   * Disconnect from a session by cleaning up the WebSocket provider and Y.Doc
+   * @param session The session data containing provider and document to disconnect
+   * @returns A promise that resolves when disconnection is complete
+   */
+  async disconnect(session: Session): Promise<void> {
+    try {
+      console.debug(
+        `Disconnecting from room ${
+          session.roomName
+        } as ${session.getUserName()} who is ${
+          session.isOwner ? "owner" : "not owner"
+        }`
+      );
+
+      // Disconnect the WebSocket provider
+      if (session.provider) {
+        // Unsubscribe from any events first
+        session.provider.off("status", () => {});
+
+        // Disconnect the provider
+        session.provider.disconnect();
+
+        // Destroy the provider (remove references)
+        session.provider.destroy();
+
+        console.debug(`WebSocket provider disconnected`);
+      }
+
+      // Destroy the Y.Doc to free up resources
+      // if (session.ydoc) {
+      //   session.ydoc.destroy();
+      //   console.debug(`Y.Doc destroyed`);
+      // }
+
+      console.debug(`Successfully disconnected from room ${session.roomName}`);
+    } catch (error) {
+      console.error(`Error during disconnection: ${error}`);
+      throw error;
+    }
+  }
+
   private async awaitConnection(provider: WebsocketProvider): Promise<void> {
     return new Promise<void>((res, _rej) => {
       // listen for 'status' event emitted by provider

@@ -60,9 +60,10 @@ export class SidebarProvider
   onPeerAdded(peer: Peer): void {
     if (this._view) {
       console.debug("Sidebar Listener peer added", peer.peerName);
-      StateManager.setPeer(peer.peerName);
+      // StateManager.setPeer(peer.peerName);
       let peers = StateManager.getPeers() || [];
       StateManager.setPeers([...peers, peer.peerName]);
+      console.debug("posting peerAdded request peers", StateManager.getPeers());
       this._view.webview.postMessage({
         type: "peerAdded",
         value: peer.peerName,
@@ -144,31 +145,20 @@ export class SidebarProvider
           }
           break;
         }
-        case "onInfo": {
-          if (!data.value) {
-            return;
-          }
-          // vscode.window.showInformationMessage(data.value);
-          await this.facade.joinSession().catch(async (err) => {
-            console.log("Error joining session", err);
-            vscode.window.showErrorMessage("Error joining session");
-            await vscode.window.showErrorMessage(err);
-          });
-          break;
-        }
         case "get-userName": {
           console.log("received get-userName request");
-          console.log(
-            "posting userName request peers",
-            StateManager.getPeers()
-          );
+          let thePeerNames = this.sessionManager
+            .getSessions()[0]
+            .getSessionPeers()
+            .map((peer) => peer.peerName);
+          console.log("posting userName request peers", thePeerNames);
           webviewView.webview.postMessage({
             type: "userName",
             value: {
               userName: StateManager.getUserName(),
               isOwner: StateManager.getIsOwner(),
               roomName: StateManager.getRoom(),
-              peerNames: StateManager.getPeers(),
+              peerNames: thePeerNames,
             },
           });
           break;
@@ -180,17 +170,6 @@ export class SidebarProvider
             value: StateManager.getToken(),
           });
           break;
-        }
-        case "onError": {
-          if (!data.value) {
-            return;
-          }
-          // vscode.window.showErrorMessage(data.value);
-          await this.facade.startSession().catch(async (err) => {
-            console.log("Error starting session", err);
-            vscode.window.showErrorMessage("Error starting session");
-            await vscode.window.showErrorMessage(err);
-          });
         }
       }
     });

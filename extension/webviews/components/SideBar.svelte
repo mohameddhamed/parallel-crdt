@@ -60,13 +60,13 @@
   });
 </script>
 
-<h1>SideBar from Svelte 2</h1>
+<h1>Parallel Code</h1>
 {#if loading}
   <h1>Loading</h1>
 {:else if user}
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <UserDetails {user} {accessToken} {roomName} {userName} {isOwner} />
+    <UserDetails {user} {roomName} {userName} {isOwner} />
     <ul>
       {#each peerNames as peer (peer)}
         <li>
@@ -74,20 +74,6 @@
         </li>
       {/each}
     </ul>
-    <button
-      on:click={() => {
-        tsvscode.postMessage({ type: "onInfo", value: "Posting Info" });
-      }}
-    >
-      Join Session
-    </button>
-    <button
-      on:click={() => {
-        tsvscode.postMessage({ type: "onError", value: "Posting Error" });
-      }}
-    >
-      Start Session
-    </button>
     <button
       on:click={() => {
         user = null;

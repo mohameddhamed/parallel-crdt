@@ -4,9 +4,7 @@
 
   let addSessionUser = "";
   let addSessionRoom = "";
-  let todos: Array<{ text: string; completed: boolean; id: number }> = [];
   export let user: User;
-  export let accessToken: string;
   export let roomName: string;
   export let userName: string;
   export let isOwner: boolean;

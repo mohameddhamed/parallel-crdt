@@ -12,10 +12,15 @@
   let user: User | null = null;
   let loading = true;
   let page: "Todo" | "Contact" = tsvscode.getState()?.page || "Todo";
+  let ongoingSession: "true" | "false" =
+    tsvscode.getState()?.ongoingSession || "false";
 
   $: {
-    tsvscode.setState({ page });
+    tsvscode.setState({ page, ongoingSession });
   }
+  const updateThisSession = (value: "true" | "false") => {
+    ongoingSession = value;
+  };
 
   onMount(async () => {
     window.addEventListener("message", async (e) => {
@@ -66,7 +71,14 @@
 {:else if user}
   {#if page == "Todo"}
     <pre>{JSON.stringify(user, null, 2)}</pre>
-    <UserDetails {user} {roomName} {userName} {isOwner} />
+    <UserDetails
+      {ongoingSession}
+      {user}
+      {roomName}
+      {userName}
+      {isOwner}
+      {updateThisSession}
+    />
     <ul>
       {#each peerNames as peer (peer)}
         <li>

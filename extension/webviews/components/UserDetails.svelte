@@ -2,12 +2,14 @@
   import { onMount } from "svelte";
   import type { User } from "../types";
 
-  let addSessionUser = "";
   let addSessionRoom = "";
+  export let ongoingSession: "true" | "false";
   export let user: User;
   export let roomName: string;
   export let userName: string;
   export let isOwner: boolean;
+  export let updateThisSession: (value: "true" | "false") => void;
+  let addSessionUser = user.name;
 
   const endSession = async () => {
     console.log("End Session post message in UserDetails");
@@ -39,37 +41,43 @@
 >
   <input bind:value={addSessionUser} placeholder="Username" />
   <input bind:value={addSessionRoom} placeholder="Room Name" />
-  <div class="button-container">
+  {#if ongoingSession === "false"}
+    <div class="button-container">
+      <button
+        type="button"
+        on:click={async () => {
+          await addSession(addSessionUser, addSessionRoom);
+          updateThisSession("true");
+          addSessionUser = "";
+          addSessionRoom = "";
+        }}
+      >
+        Join Session
+      </button>
+      <button
+        type="button"
+        on:click={async () => {
+          await addSession(addSessionUser, addSessionRoom, true);
+          updateThisSession("true");
+          addSessionUser = "";
+          addSessionRoom = "";
+        }}
+      >
+        Start Session
+      </button>
+    </div>
+  {:else}
     <button
       type="button"
       on:click={async () => {
-        await addSession(addSessionUser, addSessionRoom);
-        addSessionUser = "";
-        addSessionRoom = "";
+        updateThisSession("false");
+        console.log("End Session clicked in UserDetails");
+        await endSession();
       }}
     >
-      Join Session
+      End Session
     </button>
-    <button
-      type="button"
-      on:click={async () => {
-        await addSession(addSessionUser, addSessionRoom, true);
-        addSessionUser = "";
-        addSessionRoom = "";
-      }}
-    >
-      Start Session
-    </button>
-  </div>
-  <button
-    type="button"
-    on:click={async () => {
-      console.log("End Session clicked in UserDetails");
-      await endSession();
-    }}
-  >
-    End Session
-  </button>
+  {/if}
 </form>
 
 <style>

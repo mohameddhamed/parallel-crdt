@@ -11,10 +11,12 @@ export class Connector {
   }
   async connect(
     authenticationInfo: ConnAuthenticationInfo,
-    isOwner: boolean
+    isOwner: boolean,
+    ipAddress: string
   ): Promise<SessionData> {
+    let connectionUrl = "ws://" + ipAddress + ":1234";
     console.debug(`Connecting to WebSocket server 
-            via ${this.websocketServerUrl} 
+            via ${connectionUrl} 
             to room ${authenticationInfo.roomName} 
             as username ${authenticationInfo.username}`);
 
@@ -29,7 +31,7 @@ export class Connector {
 
     // Connect using the effective room name
     const provider = new WebsocketProvider(
-      this.websocketServerUrl,
+      connectionUrl,
       effectiveRoomName, // Use the hashed room name
       ydoc,
       {

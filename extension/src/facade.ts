@@ -11,7 +11,8 @@ export class Facade {
   async startSession(
     username: string | null = null,
     room: string | null = null,
-    password: string | null = null
+    password: string | null = null,
+    ipAddress: string | null = null
   ): Promise<void> {
     let workspaceFolderPath = this.fileSystemManager.getWorkspaceFolderPath();
     if (workspaceFolderPath === null) {
@@ -19,7 +20,12 @@ export class Facade {
     }
     let session: Session;
 
-    if (username != null && room != null && password != null) {
+    if (
+      username != null &&
+      room != null &&
+      password != null &&
+      ipAddress != null
+    ) {
       const authenticationInfo = new ConnAuthenticationInfo(
         username,
         room,
@@ -27,7 +33,8 @@ export class Facade {
       );
       session = await this.sessionManager.logIntoSession(
         true,
-        authenticationInfo
+        authenticationInfo,
+        ipAddress
       );
     } else {
       session = await this.sessionManager.logIntoSession(true);
@@ -45,15 +52,25 @@ export class Facade {
   async joinSession(
     username: string | null = null,
     room: string | null = null,
-    password: string | null = null
+    password: string | null = null,
+    ipAddress: string | null = null
   ): Promise<void> {
-    if (username != null && room != null) {
+    if (
+      username != null &&
+      room != null &&
+      password != null &&
+      ipAddress != null
+    ) {
       const authenticationInfo = new ConnAuthenticationInfo(
         username,
         room,
         password
       );
-      await this.sessionManager.logIntoSession(false, authenticationInfo);
+      await this.sessionManager.logIntoSession(
+        false,
+        authenticationInfo,
+        ipAddress
+      );
     } else {
       await this.sessionManager.logIntoSession(false);
     }

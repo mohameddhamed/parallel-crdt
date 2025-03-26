@@ -141,16 +141,18 @@ export class SidebarProvider
           let room = data.value.room;
           let isOwner = data.value.isOwner;
           let password = data.value.password;
+          let ipAddress = data.value.ipAddress;
           console.log(
             "received start-session request",
             user,
             room,
             isOwner,
-            password
+            password,
+            ipAddress
           );
           if (isOwner === true) {
             await this.facade
-              .startSession(user, room, password)
+              .startSession(user, room, password, ipAddress)
               .catch(async (err) => {
                 console.log("Error starting session", err);
                 vscode.window.showErrorMessage("Error starting session");
@@ -158,7 +160,7 @@ export class SidebarProvider
               });
           } else {
             await this.facade
-              .joinSession(user, room, password)
+              .joinSession(user, room, password, ipAddress)
               .catch(async (err) => {
                 console.log("Error joining session", err);
                 vscode.window.showErrorMessage("Error joining session");

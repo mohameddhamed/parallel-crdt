@@ -19,7 +19,8 @@ export class SessionManager extends ObservedBy<ISessionListener> {
 
   async logIntoSession(
     isOwner: boolean = false,
-    authenticationInfo: ConnAuthenticationInfo | null = null
+    authenticationInfo: ConnAuthenticationInfo | null = null,
+    ipAddress: string = "localhost"
   ): Promise<Session> {
     if (authenticationInfo === null) {
       authenticationInfo = await getSessionInfoFromUserInput();
@@ -27,7 +28,8 @@ export class SessionManager extends ObservedBy<ISessionListener> {
     // const authenticationInfo = await getSessionInfoFromUserInput();
     const sessionData = await this.connector.connect(
       authenticationInfo,
-      isOwner
+      isOwner,
+      ipAddress
     );
     const session = this.getSession(sessionData);
     this.addSession(session);

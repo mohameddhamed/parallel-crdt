@@ -4,6 +4,7 @@
 
   let addSessionRoom = "";
   let addSessionPassword = "";
+  let addSessionIpAddress = "";
   export let ongoingSession: "true" | "false";
   export let user: User;
   export let roomName: string;
@@ -20,11 +21,12 @@
     user: string,
     room: string,
     password: string,
+    ipAddress: string,
     isOwner = false
   ) => {
     tsvscode.postMessage({
       type: "start-session",
-      value: { user, room, isOwner, password },
+      value: { user, room, isOwner, password, ipAddress },
     });
   };
 
@@ -40,25 +42,38 @@
 </div>
 <form
   on:submit|preventDefault={async () => {
-    addSession(addSessionUser, addSessionRoom, addSessionPassword);
+    addSession(
+      addSessionUser,
+      addSessionRoom,
+      addSessionPassword,
+      addSessionIpAddress
+    );
     addSessionUser = "";
     addSessionRoom = "";
     addSessionPassword = "";
+    addSessionIpAddress = "";
   }}
 >
   <input bind:value={addSessionUser} placeholder="Username" />
   <input bind:value={addSessionRoom} placeholder="Room Name" />
   <input bind:value={addSessionPassword} placeholder="Password" />
+  <input bind:value={addSessionIpAddress} placeholder="IP Address" />
   {#if ongoingSession === "false"}
     <div class="button-container">
       <button
         type="button"
         on:click={async () => {
-          await addSession(addSessionUser, addSessionRoom, addSessionPassword);
+          await addSession(
+            addSessionUser,
+            addSessionRoom,
+            addSessionPassword,
+            addSessionIpAddress
+          );
           updateThisSession("true");
           addSessionUser = "";
           addSessionRoom = "";
           addSessionPassword = "";
+          addSessionIpAddress = "";
         }}
       >
         Join Session
@@ -70,12 +85,14 @@
             addSessionUser,
             addSessionRoom,
             addSessionPassword,
+            addSessionIpAddress,
             true
           );
           updateThisSession("true");
           addSessionUser = "";
           addSessionRoom = "";
           addSessionPassword = "";
+          addSessionIpAddress = "";
         }}
       >
         Start Session

@@ -1,6 +1,16 @@
 import * as vscode from "vscode";
 import * as fs from "fs";
 import * as path from "path";
+import { createHash } from "crypto";
+
+export function computeEffectiveRoomName(
+  roomName: string,
+  password: string | null
+): string {
+  const hash = createHash("sha256");
+  hash.update(roomName + ":" + password);
+  return hash.digest("hex");
+}
 
 export function getWorkspaceFolderPath(): string | null | undefined {
   if (!vscode.workspace.workspaceFolders) {
@@ -80,11 +90,43 @@ export function convertPositionToVsCodePosition(
   return new vscode.Position(position.row, position.column);
 }
 
+// X11 bright colors with their RGB values
+const X11_BRIGHT_COLORS: [string, number, number, number][] = [
+  ["DeepPink", 255, 20, 147],
+  ["MediumVioletRed", 199, 21, 133],
+  ["Crimson", 220, 20, 60],
+  ["Red", 255, 0, 0],
+  ["OrangeRed", 255, 69, 0],
+  ["DarkOrange", 255, 140, 0],
+  ["Orange", 255, 165, 0],
+  ["Gold", 255, 215, 0],
+  ["Yellow", 255, 255, 0],
+  ["LawnGreen", 124, 252, 0],
+  ["Chartreuse", 127, 255, 0],
+  ["Lime", 0, 255, 0],
+  ["LimeGreen", 50, 205, 50],
+  ["SpringGreen", 0, 255, 127],
+  ["MediumSpringGreen", 0, 250, 154],
+  ["Cyan", 0, 255, 255],
+  ["DeepSkyBlue", 0, 191, 255],
+  ["DodgerBlue", 30, 144, 255],
+  ["RoyalBlue", 65, 105, 225],
+  ["Blue", 0, 0, 255],
+  ["BlueViolet", 138, 43, 226],
+  ["DarkViolet", 148, 0, 211],
+  ["Purple", 128, 0, 128],
+  ["Magenta", 255, 0, 255],
+];
+
+/**
+ * Returns a random X11 bright color in rgba format with 0.4 opacity
+ */
 export function getRandomColor(): string {
-  return `rgba(${getRandomInt(0, 255)}, ${getRandomInt(0, 255)}, ${getRandomInt(
-    0,
-    255
-  )}, 0.4)`; // 0.4 is the opacity
+  const randomIndex = getRandomInt(0, X11_BRIGHT_COLORS.length - 1);
+  const [name, r, g, b] = X11_BRIGHT_COLORS[randomIndex];
+
+  // Return with 0.4 opacity to maintain the same transparency as the original
+  return `rgba(${r}, ${g}, ${b}, 0.4)`;
 }
 
 export function getRandomInt(max: number, min: number): number {

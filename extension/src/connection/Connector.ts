@@ -3,6 +3,7 @@ import * as Y from "yjs";
 import { ConnAuthenticationInfo } from "../models/Classes";
 import { SessionData } from "../session/SessionManager";
 import { Session } from "../session/Session";
+import { computeEffectiveRoomName } from "../models/Utils";
 
 export class Connector {
   constructor(private websocketServerUrl: string) {
@@ -17,15 +18,19 @@ export class Connector {
             to room ${authenticationInfo.roomName} 
             as username ${authenticationInfo.username}`);
 
+    // Compute the effective room name using room name and password
+    const effectiveRoomName = computeEffectiveRoomName(
+      authenticationInfo.roomName,
+      authenticationInfo.password
+    );
+
     // Holds shared data that multiple users can edit simultaneously
-    // Automatically handles conflict resolution
     const ydoc = new Y.Doc();
 
-    // connect the specified url, room (session), yjs document
-    // and ensure websocket functionality is available
+    // Connect using the effective room name
     const provider = new WebsocketProvider(
       this.websocketServerUrl,
-      authenticationInfo.roomName,
+      effectiveRoomName, // Use the hashed room name
       ydoc,
       {
         WebSocketPolyfill: require("ws"),
@@ -33,13 +38,15 @@ export class Connector {
     );
 
     await this.awaitConnection(provider);
-    console.debug(`Connected to ${authenticationInfo.roomName}`);
+    console.debug(
+      `Connected to ${authenticationInfo.roomName} (effective: ${effectiveRoomName})`
+    );
 
     return {
       provider,
       ydoc,
       username: authenticationInfo.username,
-      roomName: authenticationInfo.roomName,
+      roomName: authenticationInfo.roomName, // Original room name for display
       isOwner,
     };
   }

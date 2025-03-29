@@ -20,7 +20,7 @@ export class FileManager implements IYFileManagerListener {
   private editorManager: EditorManager = new EditorManager(this.fileStore);
 
   constructor(
-    private yFileManager: YFileManager,
+    public yFileManager: YFileManager,
     private fileShareManagerUtils: FileManagerUtils
   ) {}
 

@@ -27,7 +27,7 @@ export class SessionTreeDataProvider
     this.onDidChangeTreeDataEventEmitter.fire();
   }
 
-  onPeerRemoved(peer: Peer): void {
+  onPeerLeft(peer: Peer): void {
     this.onDidChangeTreeDataEventEmitter.fire();
   }
 
@@ -36,7 +36,7 @@ export class SessionTreeDataProvider
     this.onDidChangeTreeDataEventEmitter.fire();
   }
 
-  onRemoveSession(session: Session): void {
+  onSessionRemoved(session: Session): void {
     this.onDidChangeTreeDataEventEmitter.fire();
   }
 

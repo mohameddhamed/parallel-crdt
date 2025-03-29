@@ -19,7 +19,7 @@ export interface IEditorListener {
 
 export interface IPeerConnectionListener {
   onPeerAdded(peer: Peer): void;
-  onPeerRemoved(peer: Peer): void;
+  onPeerLeft(peerName: string): void;
 }
 
 export interface IYFileManagerListener {
@@ -32,5 +32,5 @@ export interface IYFileManagerListener {
 
 export interface ISessionListener {
   onAddSession(session: Session): void;
-  onRemoveSession(session: Session): void;
+  onSessionRemoved(session: Session): void;
 }

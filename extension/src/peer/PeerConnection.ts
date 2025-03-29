@@ -14,13 +14,16 @@ export class PeerConnection extends ObservedBy<IPeerConnectionListener> {
     );
   }
 
-  peerLeft(peer: Peer): void {
-    console.log("peer left: " + peer.peerName);
-    const index = this.peers.indexOf(peer);
+  peerLeft(peerName: string): void {
+    console.log("peer left: " + peerName);
+    const index = this.peers.findIndex((peer) => peer.peerName === peerName);
     if (index > -1) {
       this.peers.splice(index, 1);
     }
-    this.notifyListeners(async (listener) => listener.onPeerRemoved(peer));
+    console.debug("before peers: ", this.peers);
+    this.peers.pop();
+    console.debug("after peers: ", this.peers);
+    this.notifyListeners(async (listener) => listener.onPeerLeft(peerName));
   }
 
   getPeers(): Peer[] {

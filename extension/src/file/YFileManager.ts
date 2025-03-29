@@ -92,7 +92,9 @@ export class YFileManager extends ObservedBy<IYFileManagerListener> {
 
   private setupObservers(): void {
     this.peers.set(this.currentPeerName, this.currentFiles);
+    console.debug("Setting up observers for peers");
     for (const peerKey of this.peers.keys()) {
+      console.debug("Setup Observers: Adding peer: " + peerKey);
       this.addPeer(peerKey, this.peers.get(peerKey)!);
     }
     this.peers.observe(this.peerEventListener.bind(this));
@@ -110,11 +112,14 @@ export class YFileManager extends ObservedBy<IYFileManagerListener> {
         key: { action: "add" | "update" | "delete"; oldValue: boolean },
         peerName: string
       ) => {
+        console.debug("peerEventListener: " + key.action);
         switch (key.action) {
           case "add":
+            console.debug("peerEventListener: add peer: " + peerName);
             this.addPeer(peerName, this.peers.get(peerName)!);
             break;
           case "delete":
+            console.debug("###### peerEventListener: delete peer: " + peerName);
             this.deletePeer(peerName);
             break;
           default:
@@ -244,10 +249,17 @@ export class YFileManager extends ObservedBy<IYFileManagerListener> {
   }
 
   private deletePeer(peerName: string): void {
-    console.log("Deleting Peer: " + peerName + " form the session");
-    if (!this.peersEditorChannels.has(peerName)) {
-      console.error("No peer found with name: " + peerName);
-      return;
+    console.log("Deleting Peer: " + peerName + " from the session");
+    if (this.peersEditorChannels.has(peerName)) {
+      this.peersEditorChannels.delete(peerName);
     }
+    // Notify PeerConnection that the peer has left
+    this.peerConnectionListener.peerLeft(peerName);
+  }
+  // In YFileManager.ts
+  disconnect(): void {
+    this.doc.transact(() => {
+      this.peers.delete(this.currentPeerName);
+    }, this.currentPeerName);
   }
 }

@@ -46,10 +46,18 @@ export class SessionManager extends ObservedBy<ISessionListener> {
     );
   }
   removeSession(session: Session): void {
+    this.notifyListeners(async (listener) =>
+      listener.onSessionRemoved(session)
+    );
+    // console.debug("SessionManager: notifying Peers");
+    // console.debug(
+    //   "SessionManager: Peer Manager: ",
+    //   session.getPeerManager().getPeers()
+    // );
+    // session.getPeerManager().peerLeft();
     this.sessions.pop();
-    this.notifyListeners(async (listener) => listener.onRemoveSession(session));
     console.debug(
-      "SessionManager: addSession: session: ",
+      "SessionManager: removed Session: session: ",
       session,
       "Listeners notified"
     );
@@ -65,12 +73,11 @@ export class SessionManager extends ObservedBy<ISessionListener> {
       //   roomName: session.getRoomName(),
       //   isOwner: session.isOwner(),
       // };
+      // Remove the session from your session list
+      this.removeSession(session);
 
       // Disconnect from the session
       await this.connector.disconnect(session);
-
-      // Remove the session from your session list
-      this.removeSession(session);
 
       console.debug(`Session ${session.getRoomName()} ended successfully`);
     } catch (error) {

@@ -12,7 +12,7 @@ export class Session {
 
     private readonly userName: string,
     private readonly peerManager: PeerConnection,
-    public readonly fileShareManager: FileManager
+    public readonly fileManager: FileManager
   ) {}
 
   public getUserName(): string {
@@ -26,7 +26,7 @@ export class Session {
     return this.peerManager;
   }
   public shareLocalFile(file: vscode.Uri): Promise<void> {
-    return this.fileShareManager.shareLocalFileToPeers(file);
+    return this.fileManager.shareLocalFileToPeers(file);
   }
   public getRoomName(): string {
     return this.roomName;

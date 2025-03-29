@@ -40,7 +40,7 @@ export class Facade {
       session = await this.sessionManager.logIntoSession(true);
     }
     console.debug("Session started: ", session);
-    await session.fileShareManager.shareLocalFilesToPeers(workspaceFolderPath);
+    await session.fileManager.shareLocalFilesToPeers(workspaceFolderPath);
   }
 
   // TODO: session array to session instance

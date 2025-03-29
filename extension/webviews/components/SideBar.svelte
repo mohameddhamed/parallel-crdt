@@ -3,6 +3,7 @@
   import UserDetails from "./UserDetails.svelte";
   import type { User } from "../types";
 
+  let removedPeerName = "";
   let roomName = "";
   let peerName = "";
   let userName = "";
@@ -20,6 +21,9 @@
   }
   const updateThisSession = (value: "true" | "false") => {
     ongoingSession = value;
+    if (ongoingSession === "false") {
+      peerNames = [];
+    }
   };
 
   onMount(async () => {
@@ -53,6 +57,19 @@
           peerNames = message.value.peerNames;
           roomName = message.value.roomName;
           break;
+        case "sessionRemoved":
+          console.log("Sidebar session Removed, remaining: ", message.value);
+          removedPeerName = message.value;
+          const index = peerNames.indexOf(removedPeerName);
+          if (index > -1) {
+            console.log("removing peer", removedPeerName);
+            peerNames = peerNames.filter((name) => name !== removedPeerName);
+            console.log("remaining peers", peerNames);
+          }
+          if (peerNames.length < 1) {
+            updateThisSession("false");
+          }
+          break;
         case "peerAdded":
           console.log("Sidebar peer added", message.value);
           peerName = message.value;
@@ -80,6 +97,10 @@
       {updateThisSession}
     />
     <ul>
+      <script lang="ts">
+        // ... other code ...
+        $: console.log("peerNames updated:", peerNames);
+      </script>
       {#each peerNames as peer (peer)}
         <li>
           {peer}

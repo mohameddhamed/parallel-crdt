@@ -68,6 +68,9 @@ export class Connector {
         }`
       );
 
+      // Remove the peer's entry from the peers map to signal departure
+      session.fileManager.yFileManager.disconnect();
+
       // Disconnect the WebSocket provider
       if (session.provider) {
         // Unsubscribe from any events first

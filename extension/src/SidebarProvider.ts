@@ -72,21 +72,22 @@ export class SidebarProvider
       console.error("Webview is not initialized");
     }
   }
-  onPeerRemoved(peer: Peer): void {
+  onPeerLeft(peerName: string): void {
+    console.debug("Sidebar Listener peer left", peerName);
     if (this._view) {
       this._view.webview.postMessage({
-        type: "peerRemoved",
-        value: peer.peerName,
+        type: "sessionRemoved",
+        value: peerName,
       });
     } else {
       console.error("Webview is not initialized");
     }
   }
-  onRemoveSession(session: Session): void {
+  onSessionRemoved(session: Session): void {
     if (this._view) {
       this._view.webview.postMessage({
         type: "sessionRemoved",
-        value: session.getRoomName(),
+        value: session.getSessionPeers().length,
       });
     } else {
       console.error("Webview is not initialized");

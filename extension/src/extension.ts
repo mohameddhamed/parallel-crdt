@@ -9,7 +9,6 @@ import { initGlobal } from "./utils";
 import { Config } from "./Config";
 import { SessionManager } from "./session/SessionManager";
 import { Facade } from "./facade";
-import { SessionTreeDataProvider } from "./Tree/SessionTreeDataProvider";
 import { FileManagerUtils } from "./file/FileManagerUtils";
 import { Connector } from "./connection/Connector";
 
@@ -155,8 +154,6 @@ function init(context: vscode.ExtensionContext): void {
     sessionManager,
     FileManagerUtils.getFileShareManagerUtilsInstance()
   );
-  const treeProvider = new SessionTreeDataProvider(sessionManager);
-  sessionManager.registerListener(treeProvider);
   // vscode.window.registerTreeDataProvider("parallel.session", treeProvider);
 
   registerCommands(context, facade, sessionManager);

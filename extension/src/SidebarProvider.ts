@@ -6,9 +6,9 @@ import { authenticate } from "./Authenticate";
 import { Facade } from "./facade";
 import { SessionManager } from "./session/SessionManager";
 import { Session } from "./session/Session";
-import { Peer } from "./models/Classes";
+import { Peer, TextChangeType } from "./models/Classes";
 import { IPeerConnectionListener, ISessionListener } from "./models/Interfaces";
-import { TokenExpiredError } from "jsonwebtoken";
+import { getFileKeyFromUri } from "./models/Utils";
 
 export class SidebarProvider
   implements
@@ -172,10 +172,11 @@ export class SidebarProvider
         }
         case "get-userName": {
           console.log("received get-userName request");
-          let thePeerNames = this.sessionManager
-            .getSessions()[0]
-            .getSessionPeers()
-            .map((peer) => peer.peerName);
+          let thePeerNames =
+            this.sessionManager
+              .getSessions()[0]
+              ?.getSessionPeers()
+              .map((peer) => peer.peerName) || [];
           console.log("posting userName request peers", thePeerNames);
           webviewView.webview.postMessage({
             type: "userName",
@@ -194,6 +195,73 @@ export class SidebarProvider
             type: "token",
             value: StateManager.getToken(),
           });
+          break;
+        }
+        case "getPeerChanges": {
+          const peerName = data.value;
+          const activeEditor = vscode.window.activeTextEditor;
+          if (activeEditor) {
+            const uri = activeEditor.document.uri;
+            const fileKey = getFileKeyFromUri(uri); // Define this helper function
+            const session = this.sessionManager.getSessions()[0]; // Assuming one session
+            if (session) {
+              const storeFile =
+                session.fileManager.fileStore.getFileByKeyFromStore(fileKey);
+              if (storeFile) {
+                const document = storeFile.editorChannel.getDocument();
+                const changes = document.getChangesByPeer(peerName);
+                console.debug(
+                  "Sidebar Listener getPeerChanges: peer: ",
+                  peerName,
+                  " changes: ",
+                  changes
+                );
+                const insertions = changes.filter(
+                  (c) => c.type === TextChangeType.INSERT
+                ).length;
+                const deletions = changes.filter(
+                  (c) => c.type === TextChangeType.DELETE
+                ).length;
+                webviewView.webview.postMessage({
+                  type: "peerChanges",
+                  value: { peerName, insertions, deletions },
+                });
+              } else {
+                console.warn("No StoreFile found for key:", fileKey);
+              }
+            } else {
+              console.warn("No active session");
+            }
+          } else {
+            console.warn("No active text editor");
+          }
+          break;
+        }
+        case "revertPeerChanges": {
+          const peerName = data.value;
+          const activeEditor = vscode.window.activeTextEditor;
+          if (activeEditor) {
+            const uri = activeEditor.document.uri;
+            const fileKey = getFileKeyFromUri(uri); // Define this helper function
+            const session = this.sessionManager.getSessions()[0]; // Assuming one session
+            if (session) {
+              const storeFile =
+                session.fileManager.fileStore.getFileByKeyFromStore(fileKey);
+              if (storeFile) {
+                const document = storeFile.editorChannel.getDocument();
+                document.revertChangesByPeer(peerName);
+                vscode.window.showInformationMessage(
+                  `Reverted changes by ${peerName}`
+                );
+              } else {
+                console.warn("No StoreFile found for key:", fileKey);
+              }
+            } else {
+              console.warn("No active session");
+            }
+          } else {
+            console.warn("No active text editor");
+          }
           break;
         }
       }
@@ -222,28 +290,24 @@ export class SidebarProvider
     const nonce = getNonce();
 
     return `<!DOCTYPE html>
-			<html lang="en">
-			<head>
-				<meta charset="UTF-8">
-				<!--
-					Use a content security policy to only allow loading images from https or from our extension directory,
-					and only allow scripts that have a specific nonce.
-        -->
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content=" img-src https: data:; style-src 'unsafe-inline' ${
           webview.cspSource
         }; script-src 'nonce-${nonce}';">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<link href="${styleResetUri}" rel="stylesheet">
-				<link href="${styleVSCodeUri}" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="${styleResetUri}" rel="stylesheet">
+        <link href="${styleVSCodeUri}" rel="stylesheet">
         <link href="${styleMainUri}" rel="stylesheet">
         <script nonce="${nonce}">
           const tsvscode = acquireVsCodeApi();
           const apiBaseUrl = ${JSON.stringify(BASEURL)};
         </script>
-			</head>
+      </head>
       <body>
-				<script nonce="${nonce}" src="${scriptUri}"></script>
-			</body>
-			</html>`;
+        <script nonce="${nonce}" src="${scriptUri}"></script>
+      </body>
+      </html>`;
   }
 }

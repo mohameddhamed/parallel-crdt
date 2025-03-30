@@ -12,7 +12,7 @@ import { Editor } from "../editor/Editor";
 import { Session } from "../session/Session";
 
 export class FileManager implements IYFileManagerListener {
-  private fileStore = new FileStore();
+  public fileStore = new FileStore();
   private documentManager: DocumentManager = new DocumentManager(
     this.fileStore,
     this

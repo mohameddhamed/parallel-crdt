@@ -16,6 +16,11 @@
   let ongoingSession: "true" | "false" =
     tsvscode.getState()?.ongoingSession || "false";
 
+  // Store peer change summaries (e.g., { "peer1": { insertions: 52, deletions: 38 } })
+  let peerChanges: {
+    [peer: string]: { insertions: number; deletions: number };
+  } = {};
+
   $: {
     tsvscode.setState({ page, ongoingSession });
   }
@@ -23,8 +28,24 @@
     ongoingSession = value;
     if (ongoingSession === "false") {
       peerNames = [];
+      peerChanges = {}; // Clear change summaries when session ends
     }
   };
+
+  // Request change summary for a specific peer
+  function requestPeerChanges(peer: string) {
+    tsvscode.postMessage({ type: "getPeerChanges", value: peer });
+  }
+
+  // Revert changes made by a specific peer
+  function revertPeerChanges(peer: string) {
+    tsvscode.postMessage({ type: "revertPeerChanges", value: peer });
+  }
+
+  // Request change summaries for all peers when peerNames updates
+  $: if (peerNames.length > 0) {
+    peerNames.forEach((peer) => requestPeerChanges(peer));
+  }
 
   onMount(async () => {
     window.addEventListener("message", async (e) => {
@@ -75,6 +96,12 @@
           peerName = message.value;
           peerNames = [...peerNames, message.value];
           break;
+        case "peerChanges":
+          // Update peerChanges with the received summary
+          const { peer, insertions, deletions } = message.value;
+          peerChanges[peer] = { insertions, deletions };
+          peerChanges = { ...peerChanges }; // Trigger reactivity
+          break;
       }
     });
     tsvscode.postMessage({ type: "get-token", value: undefined });
@@ -97,13 +124,13 @@
       {updateThisSession}
     />
     <ul>
-      <script lang="ts">
-        // ... other code ...
-        $: console.log("peerNames updated:", peerNames);
-      </script>
       {#each peerNames as peer (peer)}
         <li>
           {peer}
+          {#if peerChanges[peer]}
+            (+{peerChanges[peer].insertions} -{peerChanges[peer].deletions})
+          {/if}
+          <button on:click={() => revertPeerChanges(peer)}>-</button>
         </li>
       {/each}
     </ul>
@@ -148,5 +175,20 @@
   .complete {
     background-color: green;
     color: white;
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 5px 0;
+  }
+  button {
+    margin-left: 5px;
+    padding: 2px 8px;
+    font-size: 12px;
   }
 </style>

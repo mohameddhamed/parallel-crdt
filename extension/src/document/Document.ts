@@ -1,8 +1,7 @@
 import { ObservedBy } from "../ObservedBy";
 import { IPeerFile, TextChange, TextChangeType } from "../models/Classes";
 import { getIndexFromPosition, getPositionFromIndex } from "../models/Utils";
-import { PeerFileMap } from "../models/Classes";
-import { IDocumentListener as IDocumentListener } from "../models/Interfaces";
+import { IDocumentListener } from "../models/Interfaces";
 import * as Y from "yjs";
 
 // change name to Document
@@ -10,6 +9,8 @@ export class Document extends ObservedBy<IDocumentListener> {
   // A local representation of the document's text content
   // used for tracking text changes
   private currentDocumentTextState: string = "";
+  // Add a history array to track changes by peer
+  private changeHistory: { peer: string; change: TextChange }[] = [];
   constructor(
     private yjsDoc: Y.Doc,
     private currentUserName: string,
@@ -44,12 +45,16 @@ export class Document extends ObservedBy<IDocumentListener> {
     );
     this.yjsDoc.transact(() => {
       textChanges.forEach(async (textChange) => {
-        await this.transactAndApplyTextChange(textChange);
+        await this.transactAndApplyTextChange(textChange, this.currentUserName);
       });
     }, this.currentUserName);
   }
 
-  async transactAndApplyTextChange(textChange: TextChange): Promise<void> {
+  // Update to accept peer parameter
+  async transactAndApplyTextChange(
+    textChange: TextChange,
+    peer: string = this.currentUserName
+  ): Promise<void> {
     console.log(
       "DocumentChannel: transactAndApplyChange: textChange: ",
       textChange
@@ -63,8 +68,8 @@ export class Document extends ObservedBy<IDocumentListener> {
       textChange.end
     );
 
-    this.transactTextChange(textChange, indexBegin, indexEnd);
-    this.applyTextChange(textChange);
+    this.transactTextChange(textChange, indexBegin, indexEnd, peer);
+    this.applyTextChange(textChange, peer);
   }
 
   sendSaveRequestToPeers(): void {
@@ -75,7 +80,8 @@ export class Document extends ObservedBy<IDocumentListener> {
   private transactTextChange(
     textChange: TextChange,
     indexBegin: number,
-    indexEnd: number
+    indexEnd: number,
+    peer: string
   ): void {
     this.yjsDoc.transact(() => {
       if (textChange.type === TextChangeType.INSERT) {
@@ -89,7 +95,7 @@ export class Document extends ObservedBy<IDocumentListener> {
         }
         this.yjsFile.peerText.insert(indexBegin, textChange.text);
       }
-    }, this.currentUserName);
+    }, peer);
   }
 
   private setupDocumentListeners(): void {
@@ -134,7 +140,10 @@ export class Document extends ObservedBy<IDocumentListener> {
           ""
         );
         textChanges.push(textToBeDeleted);
-        this.applyTextChange(textToBeDeleted);
+        this.applyTextChange(
+          textToBeDeleted,
+          event.transaction.origin as string
+        );
       } else if (delta.insert) {
         const textToBeInserted = new TextChange(
           TextChangeType.INSERT,
@@ -143,7 +152,10 @@ export class Document extends ObservedBy<IDocumentListener> {
           delta.insert as string
         );
         textChanges.push(textToBeInserted);
-        this.applyTextChange(textToBeInserted);
+        this.applyTextChange(
+          textToBeInserted,
+          event.transaction.origin as string
+        );
         textPosition += delta.insert.length;
       }
     }
@@ -167,7 +179,9 @@ export class Document extends ObservedBy<IDocumentListener> {
       }, this.currentUserName);
     }
   }
-  private applyTextChange(textChange: TextChange): void {
+
+  // Update to record changes in history
+  private applyTextChange(textChange: TextChange, peer: string): void {
     const indexBegin = getIndexFromPosition(
       this.currentDocumentTextState,
       textChange.start
@@ -179,5 +193,57 @@ export class Document extends ObservedBy<IDocumentListener> {
     const beginText = this.currentDocumentTextState.slice(0, indexBegin);
     const endText = this.currentDocumentTextState.slice(indexEnd);
     this.currentDocumentTextState = `${beginText}${textChange.text}${endText}`;
+
+    console.log("Document: recording change: ", textChange, " peer: ", peer);
+    // Record the change in history
+    this.changeHistory.push({ peer, change: textChange });
+  }
+
+  // Get changes made by a specific peer
+  getChangesByPeer(peer: string): TextChange[] {
+    console.log("Document: Change history: ", this.changeHistory);
+    let changes = this.changeHistory
+      .filter((entry) => entry.peer === peer)
+      .map((entry) => entry.change);
+    console.log(
+      "DocumentChannel: getChangesByPeer: peer: ",
+      peer,
+      " changes: ",
+      changes
+    );
+    return changes;
+  }
+
+  // Revert changes made by a specific peer
+  revertChangesByPeer(peer: string): void {
+    const changes = this.getChangesByPeer(peer).reverse();
+    console.log(
+      "DocumentChannel: revertChangesByPeer: peer: ",
+      peer,
+      " changes: ",
+      changes
+    );
+    changes.forEach((change) => {
+      if (change.type === TextChangeType.INSERT) {
+        // Revert insertion by deleting the text
+        const indexBegin = getIndexFromPosition(
+          this.currentDocumentTextState,
+          change.start
+        );
+        const indexEnd = indexBegin + change.text.length;
+        this.yjsFile.peerText.delete(indexBegin, indexEnd - indexBegin);
+      } else if (change.type === TextChangeType.DELETE) {
+        // Revert deletion by re-inserting the text
+        const indexBegin = getIndexFromPosition(
+          this.currentDocumentTextState,
+          change.start
+        );
+        this.yjsFile.peerText.insert(indexBegin, change.text);
+      }
+    });
+    // Clear this peer's history after reverting
+    this.changeHistory = this.changeHistory.filter(
+      (entry) => entry.peer !== peer
+    );
   }
 }

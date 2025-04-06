@@ -249,9 +249,11 @@ export class SidebarProvider
                 session.fileManager.fileStore.getFileByKeyFromStore(fileKey);
               if (storeFile) {
                 const document = storeFile.editorChannel.getDocument();
-                document.revertChangesByPeer(peerName);
+                // document.revertChangesByPeer(peerName);
+                const [insertCount, deleteCount] =
+                  document.getNumberOfChangesByPeer(peerName);
                 vscode.window.showInformationMessage(
-                  `Reverted changes by ${peerName}`
+                  `${peerName} has made ${insertCount} insertions and ${deleteCount} deletions`
                 );
               } else {
                 console.warn("No StoreFile found for key:", fileKey);

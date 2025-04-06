@@ -1,5 +1,10 @@
 import { ObservedBy } from "../ObservedBy";
-import { IPeerFile, TextChange, TextChangeType } from "../models/Classes";
+import {
+  IPeerFile,
+  Position,
+  TextChange,
+  TextChangeType,
+} from "../models/Classes";
 import { getIndexFromPosition, getPositionFromIndex } from "../models/Utils";
 import { IDocumentListener } from "../models/Interfaces";
 import * as Y from "yjs";
@@ -202,9 +207,18 @@ export class Document extends ObservedBy<IDocumentListener> {
   // Get changes made by a specific peer
   getChangesByPeer(peer: string): TextChange[] {
     console.log("Document: Change history: ", this.changeHistory);
-    let changes = this.changeHistory
-      .filter((entry) => entry.peer === peer)
-      .map((entry) => entry.change);
+    let changes: TextChange[] = [];
+    if (peer == this.currentUserName) {
+      changes = this.changeHistory
+        .filter((entry) => entry.peer === this.currentUserName)
+        .map((entry) => entry.change);
+    } else {
+      changes = this.changeHistory
+        .filter(
+          (entry) => entry.peer !== this.currentUserName && entry.peer != null
+        )
+        .map((entry) => entry.change);
+    }
     console.log(
       "DocumentChannel: getChangesByPeer: peer: ",
       peer,
@@ -214,7 +228,35 @@ export class Document extends ObservedBy<IDocumentListener> {
     return changes;
   }
 
+  positionCompare(position1: Position, position2: Position): number {
+    if (position1.row === position2.row) {
+      return position1.column - position2.column;
+    } else {
+      return 0;
+    }
+  }
   // Revert changes made by a specific peer
+  getNumberOfChangesByPeer(
+    peer: string
+  ): [insertCount: number, deleteCount: number] {
+    const changes = this.getChangesByPeer(peer).reverse();
+    console.log(
+      "DocumentChannel: revertChangesByPeer: peer: ",
+      peer,
+      " changes: ",
+      changes
+    );
+    let insertCount = 0,
+      deleteCount = 0;
+    changes.forEach((change) => {
+      if (this.positionCompare(change.start, change.end) < 0) {
+        deleteCount++;
+      } else if (change.text != "" && change.type === TextChangeType.INSERT) {
+        insertCount++;
+      }
+    });
+    return [insertCount, deleteCount];
+  }
   revertChangesByPeer(peer: string): void {
     const changes = this.getChangesByPeer(peer).reverse();
     console.log(

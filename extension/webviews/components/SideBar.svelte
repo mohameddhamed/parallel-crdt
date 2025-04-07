@@ -38,6 +38,10 @@
   }
 
   // Revert changes made by a specific peer
+  function revertChanges() {
+    tsvscode.postMessage({ type: "revertChanges", value: undefined });
+  }
+  // Revert changes made by a specific peer
   function revertPeerChanges(peer: string) {
     tsvscode.postMessage({ type: "revertPeerChanges", value: peer });
   }
@@ -130,7 +134,14 @@
           {#if peerChanges[peer]}
             (+{peerChanges[peer].insertions} -{peerChanges[peer].deletions})
           {/if}
-          <button on:click={() => revertPeerChanges(peer)}>-</button>
+          <div class="button-group">
+            <button on:click={() => revertPeerChanges(peer)}
+              >Get Peer Change Count</button
+            >
+            <button on:click={() => revertChanges()}
+              >Revert Changes & Sync</button
+            >
+          </div>
         </li>
       {/each}
     </ul>
@@ -186,9 +197,19 @@
     gap: 10px;
     margin: 5px 0;
   }
+  .button-group {
+    display: inline-flex;
+    gap: 8px;
+  }
   button {
-    margin-left: 5px;
-    padding: 2px 8px;
-    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    border: none;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: var(--vscode-button-hoverBackground);
   }
 </style>

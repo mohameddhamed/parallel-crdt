@@ -237,6 +237,18 @@ export class SidebarProvider
           }
           break;
         }
+        case "revertChanges": {
+          // Simulate actual Ctrl+Z keystroke
+          try {
+            await vscode.commands.executeCommand(
+              "workbench.action.focusActiveEditorGroup"
+            );
+            await vscode.commands.executeCommand("undo");
+          } catch (error) {
+            console.error("Undo failed:", error);
+          }
+          break;
+        }
         case "revertPeerChanges": {
           const peerName = data.value;
           const activeEditor = vscode.window.activeTextEditor;

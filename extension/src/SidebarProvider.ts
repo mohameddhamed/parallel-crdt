@@ -267,6 +267,10 @@ export class SidebarProvider
                 vscode.window.showInformationMessage(
                   `${peerName} has made ${insertCount} insertions and ${deleteCount} deletions`
                 );
+                webviewView.webview.postMessage({
+                  type: "peerChanges",
+                  value: { peerName, insertCount, deleteCount },
+                });
               } else {
                 console.warn("No StoreFile found for key:", fileKey);
               }

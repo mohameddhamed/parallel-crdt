@@ -1,5 +1,8 @@
+api/.env
 out
 dist
 node_modules
 .vscode-test/
 *.vsix
+notes.md
+graph.svg

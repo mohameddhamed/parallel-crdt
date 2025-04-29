@@ -8,10 +8,20 @@ import { Editor } from "../editor/Editor";
 
 // RemoteFileListener listens for all YjsListner events
 export class YFileManager extends ObservedBy<IYFileManagerListener> {
-  // map peerId -> fileKey -> file
+  /**
+   * A nested map structure representing peer file hierarchies:
+   * - First level: Maps peer IDs to their file collections
+   * - Second level: Maps file keys to individual files for each peer
+   * - Third level: Maps file properties to their values
+   */
   private peers: Y.Map<Y.Map<Y.Map<unknown>>>;
-  // map fileKey -> file
+
+  /**
+   * Maps file keys to their corresponding file instances for the current peer.
+   * Maintains a local representation of shared files in the collaborative session.
+   */
   private currentFiles = new Y.Map<Y.Map<unknown>>();
+
   private peersEditorChannels = new Map<string, Map<string, Editor>>();
 
   constructor(

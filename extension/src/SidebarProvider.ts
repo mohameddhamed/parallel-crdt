@@ -156,7 +156,17 @@ export class SidebarProvider
               .startSession(user, room, password, ipAddress)
               .catch(async (err) => {
                 console.log("Error starting session", err);
-                vscode.window.showErrorMessage("Error starting session");
+                vscode.window.showErrorMessage(
+                  "Error starting session",
+                  err?.message
+                );
+
+                if (this._view) {
+                  this._view.webview.postMessage({
+                    type: "sessionRemoved",
+                    value: user,
+                  });
+                }
                 await vscode.window.showErrorMessage(err);
               });
           } else {
@@ -164,7 +174,16 @@ export class SidebarProvider
               .joinSession(user, room, password, ipAddress)
               .catch(async (err) => {
                 console.log("Error joining session", err);
-                vscode.window.showErrorMessage("Error joining session");
+                vscode.window.showErrorMessage(
+                  "Error joining session",
+                  err?.message
+                );
+                if (this._view) {
+                  this._view.webview.postMessage({
+                    type: "sessionRemoved",
+                    value: user,
+                  });
+                }
                 await vscode.window.showErrorMessage(err);
               });
           }

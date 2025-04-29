@@ -4,12 +4,18 @@ import { FileStore } from "../file/FileStore";
 import { FileManager } from "../file/FileManager";
 
 export class DocumentManager {
+  /**
+   * Creates a new DocumentManager instance to handle document events.
+   * Event handlers are bound to maintain the correct 'this' context when called
+   * by the VS Code event system.
+   *
+   * @param fileStore - Store managing shared files
+   * @param sharerFromLocalToPeers - Manager handling file sharing between peers
+   */
   constructor(
     private fileStore: FileStore,
     private sharerFromLocalToPeers: FileManager
   ) {
-    // .bind(this) is used to ensure that the event handler methods
-    // have the correct this context when they are called by the VS Code event system.
     vscode.workspace.onDidChangeTextDocument(
       this.onChangeLocalTextDocument.bind(this)
     );
@@ -49,20 +55,8 @@ export class DocumentManager {
   }
   private onChangeLocalTextDocument(e: vscode.TextDocumentChangeEvent): void {
     if (e.contentChanges.length === 0) {
-      console.log(
-        "No content changes, reason: ",
-        e.reason,
-        "document: ",
-        e.document
-      );
       return;
     }
-    console.log(
-      "Handling local text change event: ",
-      e.contentChanges.length,
-      ", document: ",
-      e.document
-    );
 
     const fileToBeShared = this.fileStore.getFileByUriFromStore(e.document.uri);
     if (!fileToBeShared) {

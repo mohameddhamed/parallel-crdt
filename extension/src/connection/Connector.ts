@@ -39,10 +39,16 @@ export class Connector {
       }
     );
 
-    await this.awaitConnection(provider);
-    console.debug(
-      `Connected to ${authenticationInfo.roomName} (effective: ${effectiveRoomName})`
-    );
+    try {
+      await this.awaitConnection(provider);
+      console.log("Successfully connected");
+      console.debug(
+        `Connected to ${authenticationInfo.roomName} (effective: ${effectiveRoomName})`
+      );
+    } catch (error: any) {
+      console.error("Connection failed:", error?.message);
+      // Handle the error appropriately
+    }
 
     return {
       provider,
@@ -99,14 +105,19 @@ export class Connector {
   }
 
   private async awaitConnection(provider: WebsocketProvider): Promise<void> {
-    return new Promise<void>((res, _rej) => {
-      // listen for 'status' event emitted by provider
+    return new Promise<void>((res, rej) => {
       provider.on("status", (e: { status: string }) => {
         const status = e.status;
         console.debug("status on ws debug", status);
-        if (status == "connected") {
-          // resolve the promise
+        console.debug(
+          "Unsuccessful Reconnects number: ",
+          provider.wsUnsuccessfulReconnects
+        );
+
+        if (status === "connected") {
           res();
+        } else if (provider.wsUnsuccessfulReconnects >= 5) {
+          rej(new Error("Failed to connect after multiple attempts"));
         }
       });
     });

@@ -15,6 +15,8 @@
   let page: "Todo" | "Contact" = tsvscode.getState()?.page || "Todo";
   let ongoingSession: "true" | "false" =
     tsvscode.getState()?.ongoingSession || "false";
+  let isStartingSession = false; // New: Tracks session start in progress
+  let errorMessage: string | null = null; // New: Stores error message on failure
 
   // Store peer change summaries (e.g., { "peer1": { insertions: 52, deletions: 38 } })
   let peerChanges: {
@@ -27,20 +29,19 @@
     peer: string,
     changes: { insertions: number; deletions: number }
   ) {
-    peerChanges = {
-      ...peerChanges,
-      [peer]: changes, // This creates a new object
-    };
+    peerChanges = { ...peerChanges, [peer]: changes };
   }
 
   $: {
     tsvscode.setState({ page, ongoingSession });
   }
+
   const updateThisSession = (value: "true" | "false") => {
     ongoingSession = value;
-    if (ongoingSession === "false") {
+    if (value === "false") {
       peerNames = [];
-      peerChanges = {}; // Clear change summaries when session ends
+      peerChanges = {};
+      errorMessage = null; // Clear error message when session ends
     }
   };
 
@@ -53,7 +54,7 @@
   function revertChanges() {
     tsvscode.postMessage({ type: "revertChanges", value: undefined });
   }
-  // Revert changes made by a specific peer
+
   function revertPeerChanges(peer: string) {
     tsvscode.postMessage({ type: "revertPeerChanges", value: peer });
   }
@@ -71,9 +72,7 @@
         case "token":
           accessToken = message.value;
           const response = await fetch(`${apiBaseUrl}me`, {
-            headers: {
-              authorization: `Bearer ${accessToken}`,
-            },
+            headers: { authorization: `Bearer ${accessToken}` },
           });
           console.log("the response is, ", response);
           const data = await response.json();
@@ -93,6 +92,9 @@
           isOwner = message.value.isOwner;
           peerNames = message.value.peerNames;
           roomName = message.value.roomName;
+          ongoingSession = "true"; // Session started successfully
+          isStartingSession = false; // Stop loading
+          errorMessage = null; // Clear any previous errors
           break;
         case "sessionRemoved":
           console.log("Sidebar session Removed, remaining: ", message.value);
@@ -121,6 +123,11 @@
           const { peer, insertions, deletions } = message.value;
           updatePeerChanges(peer, { insertions, deletions });
           break;
+        case "sessionStartFailed":
+          isStartingSession = false; // Stop loading
+          errorMessage = message.value; // Set error message
+          ongoingSession = "false"; // Ensure we stay on the initial page
+          break;
       }
     });
     tsvscode.postMessage({ type: "get-token", value: undefined });
@@ -139,11 +146,16 @@
     {#if page === "Todo"}
       <UserDetails
         {ongoingSession}
+        {isStartingSession}
+        {errorMessage}
         {user}
         {roomName}
         {userName}
         {isOwner}
         {updateThisSession}
+        setStartingSession={(value) => {
+          isStartingSession = value;
+        }}
       />
 
       {#if peerNames.length > 0}
@@ -183,16 +195,7 @@
           </div>
         </div>
       {/if}
-
       <div class="footer">
-        <!-- <button
-          class="nav-button"
-          on:click={() => {
-            page = "Contact";
-          }}
-        >
-          Contact
-        </button> -->
         <button
           class="danger-button"
           on:click={() => {

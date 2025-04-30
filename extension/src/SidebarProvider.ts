@@ -137,7 +137,6 @@ export class SidebarProvider
           if (!data.value) {
             return;
           }
-          // vscode.window.showInformationMessage(data.value);
           let user = data.value.user;
           let room = data.value.room;
           let isOwner = data.value.isOwner;
@@ -155,36 +154,29 @@ export class SidebarProvider
             await this.facade
               .startSession(user, room, password, ipAddress)
               .catch(async (err) => {
-                console.log("Error starting session", err);
-                vscode.window.showErrorMessage(
+                console.log("Error starting session", err?.message);
+                await vscode.window.showErrorMessage(
                   "Error starting session",
                   err?.message
                 );
-
-                if (this._view) {
-                  this._view.webview.postMessage({
-                    type: "sessionRemoved",
-                    value: user,
-                  });
-                }
-                await vscode.window.showErrorMessage(err);
+                webviewView.webview.postMessage({
+                  type: "sessionStartFailed",
+                  value: err?.message || "Unknown error",
+                });
               });
           } else {
             await this.facade
               .joinSession(user, room, password, ipAddress)
               .catch(async (err) => {
-                console.log("Error joining session", err);
-                vscode.window.showErrorMessage(
+                console.log("Error joining session", err?.message);
+                await vscode.window.showErrorMessage(
                   "Error joining session",
                   err?.message
                 );
-                if (this._view) {
-                  this._view.webview.postMessage({
-                    type: "sessionRemoved",
-                    value: user,
-                  });
-                }
-                await vscode.window.showErrorMessage(err);
+                webviewView.webview.postMessage({
+                  type: "sessionStartFailed",
+                  value: err?.message || "Unknown error",
+                });
               });
           }
           break;

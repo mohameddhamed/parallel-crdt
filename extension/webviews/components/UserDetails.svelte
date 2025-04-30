@@ -5,19 +5,23 @@
   let addSessionRoom = "";
   let addSessionPassword = "";
   let addSessionIpAddress = "";
-  export let ongoingSession: "true" | "false";
+  export let ongoingSession: "true" | "false" = "false";
   export let user: User;
   export let roomName: string;
   export let userName: string;
   export let isOwner: boolean;
   export let updateThisSession: (value: "true" | "false") => void;
+  export let isStartingSession: boolean;
+  export let errorMessage: string | null;
+  export let setStartingSession: (value: boolean) => void;
   let addSessionUser = user.name;
 
   const endSession = async () => {
     console.log("End Session post message in UserDetails");
     tsvscode.postMessage({ type: "end-session", value: undefined });
   };
-  const addSession = async (
+
+  const addSession = (
     user: string,
     room: string,
     password: string,
@@ -40,9 +44,9 @@
   <div class="user-header">
     <div class="user-info">
       <span class="username">{user.name}</span>
-      <span class="badge {isOwner ? 'owner' : 'guest'}"
-        >{isOwner ? "Owner" : "Guest"}</span
-      >
+      <span class="badge {isOwner ? 'owner' : 'guest'}">
+        {isOwner ? "Owner" : "Guest"}
+      </span>
     </div>
     <div class="session-info">
       <div class="info-item">
@@ -56,8 +60,16 @@
     </div>
   </div>
 
-  {#if ongoingSession === "false"}
+  {#if isStartingSession}
+    <div class="loading">
+      <div class="spinner"></div>
+      <span>Starting session...</span>
+    </div>
+  {:else if ongoingSession === "false"}
     <div class="session-form">
+      {#if errorMessage}
+        <div class="error-message">{errorMessage}</div>
+      {/if}
       <h3>Start or Join a Session</h3>
       <form on:submit|preventDefault>
         <div class="form-grid">
@@ -69,7 +81,6 @@
               placeholder="Enter username"
             />
           </div>
-
           <div class="form-group">
             <label for="roomname">Room Name</label>
             <input
@@ -78,7 +89,6 @@
               placeholder="Enter room name"
             />
           </div>
-
           <div class="form-group">
             <label for="password">Password</label>
             <input
@@ -88,7 +98,6 @@
               placeholder="Enter password"
             />
           </div>
-
           <div class="form-group">
             <label for="ipaddress">IP Address</label>
             <input
@@ -98,20 +107,20 @@
             />
           </div>
         </div>
-
         <div class="session-actions">
           <button
             class="primary-button"
             type="button"
-            on:click={async () => {
-              await addSession(
+            disabled={isStartingSession}
+            on:click={() => {
+              setStartingSession(true);
+              addSession(
                 addSessionUser,
                 addSessionRoom,
                 addSessionPassword,
                 addSessionIpAddress,
                 true
               );
-              updateThisSession("true");
               addSessionUser = "";
               addSessionRoom = "";
               addSessionPassword = "";
@@ -120,18 +129,18 @@
           >
             <span class="icon">✚</span> Start New Session
           </button>
-
           <button
             class="secondary-button"
             type="button"
-            on:click={async () => {
-              await addSession(
+            disabled={isStartingSession}
+            on:click={() => {
+              setStartingSession(true);
+              addSession(
                 addSessionUser,
                 addSessionRoom,
                 addSessionPassword,
                 addSessionIpAddress
               );
-              updateThisSession("true");
               addSessionUser = "";
               addSessionRoom = "";
               addSessionPassword = "";
@@ -347,5 +356,35 @@
 
   .icon {
     font-size: 0.9rem;
+  }
+
+  .error-message {
+    color: var(--vscode-errorForeground, #f85149);
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+  }
+
+  .loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--vscode-editor-foreground);
+    border-radius: 50%;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 </style>

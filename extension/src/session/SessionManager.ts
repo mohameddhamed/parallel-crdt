@@ -32,6 +32,14 @@ export class SessionManager extends ObservedBy<ISessionListener> {
       ipAddress
     );
     const session = this.getSession(sessionData);
+    console.debug(`SessionManager: logIntoSession: sessionData: ${session}`);
+    if (session.provider.wsUnsuccessfulReconnects > 3) {
+      console.error(
+        "SessionManager: Failed to connect to the server. Please check your connection."
+      );
+      return session;
+      // return;
+    }
     this.addSession(session);
     return session;
   }

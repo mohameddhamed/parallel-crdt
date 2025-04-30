@@ -36,6 +36,16 @@ export class Facade {
         authenticationInfo,
         ipAddress
       );
+      console.debug("Facade: ", session.provider.wsUnsuccessfulReconnects);
+      if (session.provider.wsUnsuccessfulReconnects > 3) {
+        console.error(
+          "Facade: Failed to connect to the server. Please check your connection."
+        );
+        // return;
+        throw new Error(
+          "Facade: Failed to connect to the server. Please check your connection."
+        );
+      }
     } else {
       session = await this.sessionManager.logIntoSession(true);
     }
@@ -66,11 +76,21 @@ export class Facade {
         room,
         password
       );
-      await this.sessionManager.logIntoSession(
+      const session = await this.sessionManager.logIntoSession(
         false,
         authenticationInfo,
         ipAddress
       );
+      console.debug("Facade: ", session.provider.wsUnsuccessfulReconnects);
+      if (session.provider.wsUnsuccessfulReconnects > 3) {
+        console.error(
+          "Facade: Failed to connect to the server. Please check your connection."
+        );
+        // return;
+        throw new Error(
+          "Facade: Failed to connect to the server. Please check your connection."
+        );
+      }
     } else {
       await this.sessionManager.logIntoSession(false);
     }

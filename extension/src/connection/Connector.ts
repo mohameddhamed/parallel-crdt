@@ -106,6 +106,11 @@ export class Connector {
 
   private async awaitConnection(provider: WebsocketProvider): Promise<void> {
     return new Promise<void>((res, rej) => {
+      // Add 5 second timeout
+      const timeoutId = setTimeout(() => {
+        rej(new Error("Connection timed out after 5 seconds"));
+      }, 5000);
+
       provider.on("status", (e: { status: string }) => {
         const status = e.status;
         console.debug("status on ws debug", status);
@@ -115,8 +120,10 @@ export class Connector {
         );
 
         if (status === "connected") {
+          clearTimeout(timeoutId); // Clear timeout on successful connection
           res();
         } else if (provider.wsUnsuccessfulReconnects >= 5) {
+          clearTimeout(timeoutId); // Clear timeout on rejection
           rej(new Error("Failed to connect after multiple attempts"));
         }
       });

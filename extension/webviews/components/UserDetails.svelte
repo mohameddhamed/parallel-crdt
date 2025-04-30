@@ -16,6 +16,47 @@
   export let setStartingSession: (value: boolean) => void;
   let addSessionUser = user.name;
 
+  // Validation error states
+  let usernameError: string | null = null;
+  let roomError: string | null = null;
+  let passwordError: string | null = null;
+  let ipAddressError: string | null = null;
+
+  // Validation functions
+  function validateUsername(username: string): string | null {
+    if (!username || username.trim().length < 3) {
+      return "Username must be at least 3 characters";
+    }
+    return null;
+  }
+
+  function validateRoom(room: string): string | null {
+    if (!room || room.trim().length < 3) {
+      return "Room name must be at least 3 characters";
+    }
+    return null;
+  }
+
+  function validatePassword(password: string): string | null {
+    if (!password || password.length < 6) {
+      return "Password must be at least 6 characters";
+    }
+    return null;
+  }
+
+  function validateIpAddress(ipAddress: string): string | null {
+    if (ipAddress === "localhost") return null;
+    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipRegex.test(ipAddress)) {
+      return "Invalid IP address format (e.g., 192.168.0.1)";
+    }
+    const parts = ipAddress.split(".").map(Number);
+    if (parts.some((part) => part < 0 || part > 255)) {
+      return "IP address parts must be between 0 and 255";
+    }
+    return null;
+  }
+
   const endSession = async () => {
     console.log("End Session post message in UserDetails");
     tsvscode.postMessage({ type: "end-session", value: undefined });
@@ -64,6 +105,15 @@
     <div class="loading">
       <div class="spinner"></div>
       <span>Starting session...</span>
+      <button
+        class="danger-button"
+        on:click={async () => {
+          await endSession();
+          setStartingSession(false);
+        }}
+      >
+        Abort
+      </button>
     </div>
   {:else if ongoingSession === "false"}
     <div class="session-form">
@@ -80,6 +130,9 @@
               bind:value={addSessionUser}
               placeholder="Enter username"
             />
+            {#if usernameError}
+              <div class="error-message">{usernameError}</div>
+            {/if}
           </div>
           <div class="form-group">
             <label for="roomname">Room Name</label>
@@ -88,6 +141,9 @@
               bind:value={addSessionRoom}
               placeholder="Enter room name"
             />
+            {#if roomError}
+              <div class="error-message">{roomError}</div>
+            {/if}
           </div>
           <div class="form-group">
             <label for="password">Password</label>
@@ -97,6 +153,9 @@
               bind:value={addSessionPassword}
               placeholder="Enter password"
             />
+            {#if passwordError}
+              <div class="error-message">{passwordError}</div>
+            {/if}
           </div>
           <div class="form-group">
             <label for="ipaddress">IP Address</label>
@@ -105,6 +164,9 @@
               bind:value={addSessionIpAddress}
               placeholder="Enter IP address"
             />
+            {#if ipAddressError}
+              <div class="error-message">{ipAddressError}</div>
+            {/if}
           </div>
         </div>
         <div class="session-actions">
@@ -113,6 +175,20 @@
             type="button"
             disabled={isStartingSession}
             on:click={() => {
+              usernameError = validateUsername(addSessionUser);
+              roomError = validateRoom(addSessionRoom);
+              passwordError = validatePassword(addSessionPassword);
+              ipAddressError = validateIpAddress(addSessionIpAddress);
+
+              if (
+                usernameError ||
+                roomError ||
+                passwordError ||
+                ipAddressError
+              ) {
+                return;
+              }
+
               setStartingSession(true);
               addSession(
                 addSessionUser,
@@ -134,6 +210,20 @@
             type="button"
             disabled={isStartingSession}
             on:click={() => {
+              usernameError = validateUsername(addSessionUser);
+              roomError = validateRoom(addSessionRoom);
+              passwordError = validatePassword(addSessionPassword);
+              ipAddressError = validateIpAddress(addSessionIpAddress);
+
+              if (
+                usernameError ||
+                roomError ||
+                passwordError ||
+                ipAddressError
+              ) {
+                return;
+              }
+
               setStartingSession(true);
               addSession(
                 addSessionUser,

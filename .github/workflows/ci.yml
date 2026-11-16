@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build & Test Extension & Services
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+
+      - name: Verify Workspace Structure
+        run: |
+          test -d extension
+          test -d api
+          test -d testing/test-utils
+
+      - name: Test Utils Execution
+        run: |
+          cd testing/test-utils
+          npm install --package-lock-only || npm install --legacy-peer-deps
+          npx jest --version

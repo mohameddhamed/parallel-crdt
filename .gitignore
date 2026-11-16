@@ -1,8 +1,9 @@
-api/.env
-out
-dist
-node_modules
+node_modules/
+**/node_modules/
+dist/
+out/
+.DS_Store
+**/.DS_Store
+*.log
 .vscode-test/
-*.vsix
-notes.md
-graph.svg
+.env

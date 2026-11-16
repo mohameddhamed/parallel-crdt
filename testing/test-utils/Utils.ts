@@ -1,0 +1,227 @@
+import * as vscode from "vscode";
+import * as fs from "fs";
+import * as path from "path";
+import { createHash } from "crypto";
+
+export class Position {
+  constructor(public row: number, public column: number) {}
+}
+export class Selection {
+  constructor(
+    public id: string,
+    public reversed: boolean,
+    public isCursor: boolean,
+    public start: Position,
+    public end: Position
+  ) {}
+}
+
+export function computeEffectiveRoomName(
+  roomName: string,
+  password: string | null
+): string {
+  const hash = createHash("sha256");
+  hash.update(roomName + ":" + password);
+  return hash.digest("hex");
+}
+
+export function getWorkspaceFolderPath(): string | null | undefined {
+  if (!vscode.workspace.workspaceFolders) {
+    return null;
+  }
+  // REWRITE THIS
+  for (const workspaceFolder of vscode.workspace.workspaceFolders) {
+    return workspaceFolder.uri.fsPath;
+  }
+}
+
+export function getFileKeyFromUri(uri: vscode.Uri): string {
+  // vscode.Uri is used to represent file and directory paths in a way that is
+  // compatible with the VS Code API.
+  // It allows you to perform operations like reading, writing, and deleting files
+  // using VS Code's built-in methods.
+  const workspaceFolderPath = getWorkspaceFolderPath();
+
+  let uriString = uri.fsPath;
+  // get relative path
+  if (workspaceFolderPath) {
+    uriString = uriString.split(workspaceFolderPath)[1];
+  }
+  // replace backslashes with forward
+  uriString = uriString.replace(/\\/g, "/");
+  // remove leading slash
+  if (uriString[0] === "/") {
+    uriString = uriString.slice(1);
+  }
+
+  return uriString;
+}
+
+export function createEmptyFile(filePath: string): boolean {
+  // check if file exists
+  if (fs.existsSync(filePath)) {
+    return false;
+  }
+  createDirectory(path.join(path.dirname(filePath)));
+  // create empty file by closing immediately
+  fs.createWriteStream(filePath).close();
+  return true;
+}
+
+export function createDirectory(directoryPath: string): boolean {
+  // check if directory exists
+  if (fs.existsSync(directoryPath)) {
+    return false;
+  }
+  fs.mkdirSync(directoryPath, { recursive: true });
+  return true;
+}
+
+export async function getAllFilesInDir(dirPath: string): Promise<vscode.Uri[]> {
+  const relativePattern = new vscode.RelativePattern(dirPath, "**/*");
+  return vscode.workspace.findFiles(relativePattern);
+}
+
+// Removed redundant import of Position
+import { get } from "http";
+
+export function isCursor(selection: vscode.Selection): boolean {
+  return (
+    selection.start.line === selection.end.line &&
+    selection.start.character === selection.end.character
+  );
+}
+export function convertVsCodePositionToPosition(
+  position: vscode.Position
+): Position {
+  return new Position(position.line, position.character);
+}
+
+export function convertPositionToVsCodePosition(
+  position: Position
+): vscode.Position {
+  return new vscode.Position(position.row, position.column);
+}
+
+// X11 bright colors with their RGB values
+const X11_BRIGHT_COLORS: [string, number, number, number][] = [
+  ["DeepPink", 255, 20, 147],
+  ["MediumVioletRed", 199, 21, 133],
+  ["Crimson", 220, 20, 60],
+  ["Red", 255, 0, 0],
+  ["OrangeRed", 255, 69, 0],
+  ["DarkOrange", 255, 140, 0],
+  ["Orange", 255, 165, 0],
+  ["Gold", 255, 215, 0],
+  ["Yellow", 255, 255, 0],
+  ["LawnGreen", 124, 252, 0],
+  ["Chartreuse", 127, 255, 0],
+  ["Lime", 0, 255, 0],
+  ["LimeGreen", 50, 205, 50],
+  ["SpringGreen", 0, 255, 127],
+  ["MediumSpringGreen", 0, 250, 154],
+  ["Cyan", 0, 255, 255],
+  ["DeepSkyBlue", 0, 191, 255],
+  ["DodgerBlue", 30, 144, 255],
+  ["RoyalBlue", 65, 105, 225],
+  ["Blue", 0, 0, 255],
+  ["BlueViolet", 138, 43, 226],
+  ["DarkViolet", 148, 0, 211],
+  ["Purple", 128, 0, 128],
+  ["Magenta", 255, 0, 255],
+];
+
+/**
+ * Returns a random X11 bright color in rgba format with 0.4 opacity
+ */
+export function getRandomColor(): string {
+  const randomIndex = getRandomInt(0, X11_BRIGHT_COLORS.length - 1);
+  const [name, r, g, b] = X11_BRIGHT_COLORS[randomIndex];
+
+  // Return with 0.4 opacity to maintain the same transparency as the original
+  return `rgba(${r}, ${g}, ${b}, 0.4)`;
+}
+
+export function getRandomInt(max: number, min: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+export function getVsCodeRange(start: Position, end: Position): vscode.Range {
+  return new vscode.Range(
+    convertPositionToVsCodePosition(start),
+    convertPositionToVsCodePosition(end)
+  );
+}
+
+export function getIndexFromPosition(text: string, position: Position): number {
+  let line = 0,
+    character = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (line == position.row && character == position.column) {
+      return i;
+    }
+    const { row, column } = getRowAndColFromIndex(text, i, character, line);
+    line = row;
+    character = column;
+  }
+  return text.length;
+}
+
+export function getPositionFromIndex(text: string, index: number): Position {
+  let line = 0,
+    character = 0;
+
+  for (let i = 0; i < Math.min(index, text.length); i++) {
+    const { row, column } = getRowAndColFromIndex(text, i, character, line);
+    line = row;
+    character = column;
+  }
+  return new Position(line, character);
+}
+
+export function getRowAndColFromIndex(
+  text: string,
+  index: number,
+  startingColumn: number = 0,
+  startingRow: number = 0
+): { row: number; column: number } {
+  // If the character at the current index i is a carriage return (\r),
+  if (text.charAt(index) == "\r") {
+    // checks if the next character is a newline (\n).
+    if (!(index + 1 < text.length) || text.charAt(index + 1) != "\n") {
+      // it increments the line number and resets the character position to 0.
+      startingRow++;
+      startingColumn = 0;
+    }
+    // If the character at the current index i is a newline (\n),
+  } else if (text.charAt(index) == "\n") {
+    // it increments the line number and resets the character position to 0.
+    startingRow++;
+    startingColumn = 0;
+  } else {
+    // Otherwise, it increments the character position.
+    startingColumn++;
+  }
+  return { row: startingRow, column: startingColumn };
+}
+export function getUriOfFile(fileName: string): vscode.Uri {
+  const fullPathToFile = path.join(this.workspaceFolderPath, fileName);
+  return vscode.Uri.file(fullPathToFile);
+}
+
+export function addFileLocally(fileName: string): vscode.Uri | null {
+  const fullPathToFile = path.join(this.workspaceFolderPath, fileName);
+  if (!createEmptyFile(fullPathToFile)) {
+    console.log(
+      "Create Empty File error: File already exists: ",
+      fullPathToFile
+    );
+    return null;
+  }
+  return vscode.Uri.file(fullPathToFile);
+}
+
+export function deleteFileLocally(file: vscode.Uri): void {
+  const fullPathToFile = file.fsPath;
+  fs.unlinkSync(fullPathToFile);
+}
